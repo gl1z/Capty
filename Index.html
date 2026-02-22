@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capty — YouTube Transcript Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Noto+Sans+AR:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg:         #1a1a1e;
+            --surface:    #222226;
+            --surface-2:  #2a2a2f;
+            --border:     #2f2f35;
+            --border-2:   #3a3a42;
+            --accent:     #ff6b6b;
+            --accent-dim: rgba(255, 107, 107, 0.12);
+            --text:       #f5f5f7;
+            --text-2:     #a1a1aa;
+            --text-3:     #52525b;
+            --success:    #4ade80;
+            --radius:     10px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Geist', sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 72px 20px 100px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Header ─────────────────────────────── */
+        header {
+            text-align: center;
+            margin-bottom: 52px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--accent);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: #fff;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text);
+        }
+
+        .tagline {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-3);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* ── Main card ───────────────────────────── */
+        .card {
+            width: 100%;
+            max-width: 680px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        /* ── Input row ───────────────────────────── */
+        .input-wrap {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: 'Geist', sans-serif;
+            font-size: 0.9rem;
+            padding: 11px 14px;
+            outline: none;
+            transition: border-color 0.18s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-3);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-family: 'Geist', sans-serif;
+            font-weight: 600;
+            font-size: 0.88rem;
+            padding: 11px 22px;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+            white-space: nowrap;
+            letter-spacing: -0.2px;
+        }
+
+        .btn-primary:hover  { opacity: 0.88; }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+        /* ── Language tabs ───────────────────────── */
+        .lang-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-2);
+            font-family: 'Geist', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.02em;
+        }
+
+        .lang-btn:hover {
+            border-color: var(--border-2);
+            color: var(--text);
+        }
+
+        .lang-btn.active {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── Status bar ──────────────────────────── */
+        #status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            color: var(--text-3);
+            min-height: 20px;
+            margin-bottom: 16px;
+            font-weight: 400;
+        }
+
+        #status.err  { color: var(--accent); }
+        #status.ok   { color: var(--success); }
+
+        /* ── Toolbar ─────────────────────────────── */
+        .toolbar {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .meta {
+            font-size: 0.75rem;
+            color: var(--text-3);
+            font-weight: 400;
+        }
+
+        .toolbar-actions { display: flex; gap: 6px; }
+
+        .btn-sm {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            color: var(--text-2);
+            font-family: 'Geist', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 5px 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-sm:hover {
+            border-color: var(--border-2);
+            color: var(--text);
+        }
+
+        /* ── Download dropdown ───────────────────── */
+        .download-wrap {
+            position: relative;
+        }
+
+        .download-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px;
+            z-index: 10;
+            min-width: 120px;
+        }
+
+        .download-menu.show {
+            display: block;
+        }
+
+        .download-option {
+            display: block;
+            width: 100%;
+            background: none;
+            border: none;
+            color: var(--text-2);
+            font-family: 'Geist', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 7px 12px;
+            cursor: pointer;
+            text-align: left;
+            border-radius: 5px;
+            transition: all 0.12s;
+        }
+
+        .download-option:hover {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        /* ── Transcript output ───────────────────── */
+        #output {
+            display: none;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            max-height: 460px;
+            overflow-y: auto;
+            font-family: 'Noto Sans', 'Noto Sans JP', 'Noto Sans SC', 'Noto Sans AR', 'Geist', sans-serif;
+            font-size: 0.88rem;
+            line-height: 1.85;
+            color: var(--text-2);
+            white-space: pre-wrap;
+            word-break: break-word;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        /* ── Spinner ─────────────────────────────── */
+        .spinner {
+            width: 13px;
+            height: 13px;
+            border: 2px solid var(--border-2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.65s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Footer ──────────────────────────────── */
+        footer {
+            margin-top: 36px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-3);
+        }
+
+        footer a {
+            color: var(--text-3);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border);
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        footer a:hover {
+            color: var(--text-2);
+            border-color: var(--border-2);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────── -->
+<header>
+    <div class="logo">
+        <div class="logo-icon">
+            <!-- Simple caption/text icon — edit this SVG to change the logo -->
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="5" width="16" height="2.5" rx="1.25"/>
+                <rect x="2" y="9.5" width="11" height="2.5" rx="1.25"/>
+                <rect x="2" y="14" width="13" height="2.5" rx="1.25"/>
+            </svg>
+        </div>
+        <span class="logo-text">Capty</span>
+    </div>
+    <p class="tagline">YouTube transcript, instantly</p>
+</header>
+
+<!-- ── Main card ────────────────────────────────────────── -->
+<div class="card">
+
+    <div class="input-wrap">
+        <input
+                type="text"
+                id="urlInput"
+                placeholder="Paste YouTube URL or video ID…"
+                autocomplete="off"
+                spellcheck="false"
+        >
+        <button class="btn-primary" id="fetchBtn" onclick="fetchTranscript()">
+            Get transcript
+        </button>
+    </div>
+
+    <div class="lang-row" id="langRow"></div>
+
+    <div id="status"></div>
+
+    <div class="toolbar" id="toolbar">
+        <span class="meta" id="metaText"></span>
+        <div class="toolbar-actions">
+            <button class="btn-sm" onclick="copyText(event)">Copy</button>
+            <div class="download-wrap">
+                <button class="btn-sm" onclick="toggleDownloadMenu(event)">Download ▾</button>
+                <div class="download-menu" id="downloadMenu">
+                    <button class="download-option" onclick="downloadAs('txt')">.txt</button>
+                    <button class="download-option" onclick="downloadAs('pdf')">.pdf</button>
+                    <button class="download-option" onclick="downloadAs('docx')">.docx</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="output"></div>
+
+</div>
+
+<!-- ── Footer ───────────────────────────────────────────── -->
+<footer>
+    Built by <a href="https://github.com/gl1z" target="_blank">@gl1z</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/gl1z/capty" target="_blank">Source</a>
+</footer>
+
+<script>
+    // ── State ───────────────────────────────────────────────
+    let currentText    = '';
+    let currentVideoId = '';
+    let captionTracks  = [];
+
+    // ── Helpers ─────────────────────────────────────────────
+    function extractVideoId(input) {
+        input = input.trim();
+        const patterns = [
+            /(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/,
+            /^([A-Za-z0-9_-]{11})$/,
+        ];
+        for (const p of patterns) {
+            const m = input.match(p);
+            if (m) return m[1];
+        }
+        return null;
+    }
+
+    function setStatus(html, type = '') {
+        const el   = document.getElementById('status');
+        el.className = type;
+        el.innerHTML = html;
+    }
+
+    function showSpinner(msg) {
+        setStatus(`<div class="spinner"></div><span>${msg}</span>`);
+    }
+
+    // ── Step 1: Get caption tracks from backend ──────────
+    async function fetchTranscript() {
+        const input   = document.getElementById('urlInput').value;
+        const videoId = extractVideoId(input);
+
+        if (!videoId) {
+            setStatus('Paste a valid YouTube URL or video ID.', 'err');
+            return;
+        }
+
+        currentVideoId = videoId;
+        document.getElementById('fetchBtn').disabled = true;
+        document.getElementById('langRow').innerHTML  = '';
+        document.getElementById('output').style.display  = 'none';
+        document.getElementById('toolbar').style.display = 'none';
+        showSpinner('Fetching video info…');
+
+        try {
+            const res  = await fetch(`/api/transcript?id=${videoId}`);
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+
+            captionTracks = data.tracks;
+
+            // Render language buttons
+            const langRow = document.getElementById('langRow');
+            captionTracks.forEach((track, i) => {
+                const btn = document.createElement('button');
+                btn.className   = 'lang-btn' + (i === 0 ? ' active' : '');
+                btn.textContent = track.name + (track.isAutoGenerated ? ' (auto)' : '');
+                btn.onclick     = () => loadCaption(i, btn);
+                langRow.appendChild(btn);
+            });
+
+            // Auto-load the first track
+            await loadCaption(0);
+
+        } catch (err) {
+            setStatus(err.message, 'err');
+            document.getElementById('fetchBtn').disabled = false;
+        }
+    }
+
+    // ── Step 2: Fetch the actual text for a chosen track ────
+    async function loadCaption(index, btn) {
+        if (btn) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        showSpinner('Loading transcript…');
+
+        try {
+            const track = captionTracks[index];
+            const res   = await fetch(`/api/caption?id=${currentVideoId}&lang=${track.languageCode}`);
+            const data  = await res.json();
+
+            if (!res.ok) throw new Error(data.error || 'Failed to load transcript.');
+
+            currentText = data.text;
+
+            const wordCount = currentText.split(/\s+/).filter(Boolean).length;
+            document.getElementById('metaText').textContent =
+                `${wordCount.toLocaleString()} words`;
+
+            const out       = document.getElementById('output');
+            out.textContent = currentText;
+            out.style.display = 'block';
+
+            document.getElementById('toolbar').style.display = 'flex';
+            setStatus('Transcript ready', 'ok');
+
+        } catch (err) {
+            setStatus(err.message, 'err');
+        }
+
+        document.getElementById('fetchBtn').disabled = false;
+    }
+
+    // ── Actions ──────────────────────────────────────────────
+    function copyText(e) {
+        navigator.clipboard.writeText(currentText).then(() => {
+            const btn  = e?.target || document.querySelector('.btn-sm');
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => (btn.textContent = orig), 1600);
+        });
+    }
+
+    // ── Download dropdown ────────────────────────────────────
+    function toggleDownloadMenu(e) {
+        e.stopPropagation();
+        const menu = document.getElementById('downloadMenu');
+        menu.classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+        document.getElementById('downloadMenu')?.classList.remove('show');
+    });
+
+    function downloadAs(format) {
+        document.getElementById('downloadMenu').classList.remove('show');
+        const filename = `capty-${currentVideoId}`;
+
+        if (format === 'txt') {
+            const blob = new Blob([currentText], { type: 'text/plain' });
+            downloadBlob(blob, `${filename}.txt`);
+        }
+
+        if (format === 'pdf') {
+            // Generate a simple PDF using browser print
+            const win = window.open('', '_blank');
+            win.document.write(`
+                <html>
+                <head>
+                    <title>${filename}</title>
+                    <style>
+                        body {
+                            font-family: 'Segoe UI', 'Noto Sans', Arial, sans-serif;
+                            font-size: 13px;
+                            line-height: 1.8;
+                            padding: 40px;
+                            color: #222;
+                            max-width: 700px;
+                        }
+                        h1 {
+                            font-size: 16px;
+                            color: #666;
+                            margin-bottom: 20px;
+                            border-bottom: 1px solid #ddd;
+                            padding-bottom: 10px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>Capty Transcript — ${currentVideoId}</h1>
+                    <p>${currentText.replace(/\n/g, '<br>')}</p>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            setTimeout(() => { win.print(); }, 400);
+        }
+
+        if (format === 'docx') {
+            // Generate a minimal .docx (Word) file
+            // .docx is a zip of XML files — we create a simple one
+            const docContent = `
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    <w:p><w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>Capty Transcript — ${currentVideoId}</w:t></w:r></w:p>
+    <w:p><w:r><w:t></w:t></w:r></w:p>
+    ${currentText.split(/\n+/).map(para =>
+                `<w:p><w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">${para.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</w:t></w:r></w:p>`
+            ).join('\n')}
+  </w:body>
+</w:document>`.trim();
+
+            // For a proper .docx we'd need a zip library.
+            // Instead, download as .doc (Word can open this XML format)
+            const blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            downloadBlob(blob, `${filename}.doc`);
+        }
+    }
+
+    function downloadBlob(blob, name) {
+        const a  = document.createElement('a');
+        a.href   = URL.createObjectURL(blob);
+        a.download = name;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    // ── Enter key ────────────────────────────────────────────
+    document.getElementById('urlInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') fetchTranscript();
+    });
+</script>
+
+</body>
+</html>

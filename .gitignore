@@ -1,0 +1,6 @@
+.idea/
+node_modules/
+dev-notes.md
+.env
+.DS_Store
+*.log
