@@ -1,6 +1,6 @@
 # Capty
 
-Get the transcript of any YouTube video instantly. Free, no signup, no BS.
+Get the transcript of any YouTube video instantly. Free, no signup, no API keys.
 
 ## Stack
 
