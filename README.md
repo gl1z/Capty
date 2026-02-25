@@ -2,8 +2,6 @@
 
 **[Live Demo →](https://capty.onrender.com)** *(https://capty-izpe.onrender.com)*
 
-![![img.png](img.png)](https://github.com/user-attachments/assets/placeholder)
-
 Paste a YouTube link, get the transcript. That's it.
 
 Works with any video that has captions. If there are no captions, it can transcribe the audio using OpenAI Whisper. You can also translate the result into other languages.
