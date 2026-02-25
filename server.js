@@ -1,19 +1,44 @@
-const express    = require('express');
-const path       = require('path');
-const fs         = require('fs');
-const os         = require('os');
+require('dotenv').config();
+const express      = require('express');
+const path         = require('path');
+const fs           = require('fs');
+const os           = require('os');
 const { execFile } = require('child_process');
-const rateLimit  = require('express-rate-limit');
+const rateLimit    = require('express-rate-limit');
+const OpenAI       = require('openai');
 
-const app  = express();
-const PORT = process.env.PORT || 3000;
+const app    = express();
+const PORT   = process.env.PORT || 3000;
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// ─── Security headers ──────────────────────────────────────────────────────
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+});
+
+app.use(express.json({ limit: '1mb' }));  // was 50mb — way too high, 1mb is plenty for text
+
+// ─── Rate limiting ─────────────────────────────────────────────────────────
 const limiter = rateLimit({
     windowMs: 60 * 1000,
     max: 15,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests. Please wait a moment.' },
+});
+
+// Stricter limit for expensive AI endpoints
+const aiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'AI request limit reached. Wait a minute.' },
 });
 
 app.use('/api/', limiter);
@@ -33,6 +58,15 @@ function runYtDlp(args) {
     });
 }
 
+// ─── Input validation ──────────────────────────────────────────────────────
+function isValidVideoId(id) {
+    return typeof id === 'string' && /^[A-Za-z0-9_-]{11}$/.test(id);
+}
+
+function isValidLangCode(lang) {
+    return typeof lang === 'string' && /^[a-zA-Z]{2}(-[a-zA-Z]{2,10})?$/.test(lang);
+}
+
 // ─── Language config ────────────────────────────────────────────────────────
 const LANG_NAMES = {
     en: 'English', es: 'Spanish', de: 'German', ja: 'Japanese',
@@ -44,11 +78,30 @@ const LANG_NAMES = {
     'de-DE': 'German (Germany)',
 };
 
-// Only show these languages in the UI
 const ALLOWED_LANGS = new Set([
     'en', 'es', 'de', 'ja', 'zh', 'ru',
     'pt-BR', 'es-419', 'de-DE', 'zh-Hans', 'zh-Hant',
 ]);
+
+const TRANSLATE_LANGS = [
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+    { code: 'it', name: 'Italian' },
+    { code: 'pt', name: 'Portuguese' },
+    { code: 'ru', name: 'Russian' },
+    { code: 'ja', name: 'Japanese' },
+    { code: 'ko', name: 'Korean' },
+    { code: 'zh', name: 'Chinese (Simplified)' },
+    { code: 'ar', name: 'Arabic' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'tr', name: 'Turkish' },
+    { code: 'pl', name: 'Polish' },
+    { code: 'nl', name: 'Dutch' },
+    { code: 'sv', name: 'Swedish' },
+];
+
+const VALID_TRANSLATE_CODES = new Set(TRANSLATE_LANGS.map(l => l.code));
 
 function getLangName(code) {
     return LANG_NAMES[code] || code;
@@ -58,23 +111,16 @@ function getLangName(code) {
 app.get('/api/transcript', async (req, res) => {
     const { id } = req.query;
 
-    if (!id || !/^[A-Za-z0-9_-]{11}$/.test(id)) {
+    if (!isValidVideoId(id)) {
         return res.status(400).json({ error: 'Invalid video ID.' });
     }
 
     try {
-        const url = `https://www.youtube.com/watch?v=${id}`;
-
-        const output = await runYtDlp([
-            '--dump-json',
-            '--skip-download',
-            url,
-        ]);
-
-        const info = JSON.parse(output);
+        const url    = `https://www.youtube.com/watch?v=${id}`;
+        const output = await runYtDlp(['--dump-json', '--skip-download', url]);
+        const info   = JSON.parse(output);
         const tracks = [];
 
-        // 1. Manual/uploaded subtitles — only allowed languages
         if (info.subtitles) {
             for (const lang of Object.keys(info.subtitles)) {
                 if (ALLOWED_LANGS.has(lang)) {
@@ -87,7 +133,6 @@ app.get('/api/transcript', async (req, res) => {
             }
         }
 
-        // 2. Auto-generated — only the original language (if it's allowed)
         if (info.automatic_captions) {
             const origLang = info.language || 'en';
             if (!tracks.find(t => t.languageCode === origLang)) {
@@ -100,14 +145,15 @@ app.get('/api/transcript', async (req, res) => {
         }
 
         if (tracks.length === 0) {
-            throw new Error('No captions found for this video.');
+            return res.json({ tracks: [], whisperAvailable: true });
         }
 
-        console.log(`Found ${tracks.length} tracks for ${id}:`, tracks.map(t => t.name).join(', '));
-        res.json({ tracks });
+        console.log(`Found ${tracks.length} tracks for ${id}`);
+        res.json({ tracks, whisperAvailable: false });
+
     } catch (err) {
         console.log('Transcript error:', err.message);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Failed to fetch video info.' });  // don't leak internal errors
     }
 });
 
@@ -115,18 +161,15 @@ app.get('/api/transcript', async (req, res) => {
 app.get('/api/caption', async (req, res) => {
     const { id, lang } = req.query;
 
-    if (!id) {
-        return res.status(400).json({ error: 'Missing video ID.' });
-    }
+    if (!isValidVideoId(id)) return res.status(400).json({ error: 'Invalid video ID.' });
 
-    const language = lang || 'en';
-    const url = `https://www.youtube.com/watch?v=${id}`;
-    const tmpFile = path.join(os.tmpdir(), `capty-${id}-${Date.now()}`);
+    const language = (lang && isValidLangCode(lang)) ? lang : 'en';
+    const url      = `https://www.youtube.com/watch?v=${id}`;
+    const tmpFile  = path.join(os.tmpdir(), `capty-${id}-${Date.now()}`);
 
     try {
         await runYtDlp([
-            '--write-sub',
-            '--write-auto-sub',
+            '--write-sub', '--write-auto-sub',
             '--sub-lang', language,
             '--sub-format', 'vtt/srv1/best',
             '--skip-download',
@@ -135,42 +178,135 @@ app.get('/api/caption', async (req, res) => {
         ]);
 
         let subContent = '';
-        const possibleExts = [
-            `.${language}.vtt`,
-            `.${language}.srv1`,
-            `.${language}.json3`,
-            `.${language}.srt`,
-        ];
+        const exts = [`.${language}.vtt`, `.${language}.srv1`, `.${language}.json3`, `.${language}.srt`];
 
-        for (const ext of possibleExts) {
+        for (const ext of exts) {
             const filePath = tmpFile + ext;
             if (fs.existsSync(filePath)) {
                 subContent = fs.readFileSync(filePath, 'utf8');
                 fs.unlinkSync(filePath);
-                console.log(`Read subtitle: ${ext} (${subContent.length} chars)`);
                 break;
             }
         }
 
-        if (!subContent) {
-            throw new Error('yt-dlp did not produce a subtitle file.');
-        }
+        if (!subContent) throw new Error('No subtitle file produced.');
 
         const text = parseSubtitleToText(subContent);
+        if (!text) throw new Error('Could not parse subtitles.');
 
-        if (!text) {
-            throw new Error('Could not parse subtitle content.');
-        }
+        res.json({ text, translateLangs: TRANSLATE_LANGS });
 
-        console.log(`Success! ${text.length} chars for ${id} (${language})`);
-        res.json({ text });
     } catch (err) {
         console.log('Caption error:', err.message);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Failed to load transcript.' });
     }
 });
 
-// ─── Parse VTT/SRT/XML to plain text ───────────────────────────────────────
+// ─── API: POST /api/whisper ─────────────────────────────────────────────────
+app.post('/api/whisper', aiLimiter, async (req, res) => {
+    const { id } = req.body;
+
+    if (!isValidVideoId(id)) {
+        return res.status(400).json({ error: 'Invalid video ID.' });
+    }
+
+    const url     = `https://www.youtube.com/watch?v=${id}`;
+    const tmpFile = path.join(os.tmpdir(), `capty-whisper-${id}-${Date.now()}`);
+
+    try {
+        console.log(`Downloading audio for Whisper: ${id}`);
+
+        await runYtDlp([
+            '--extract-audio',
+            '--audio-format', 'mp3',
+            '--audio-quality', '5',
+            '--max-filesize', '25m',
+            '-o', `${tmpFile}.%(ext)s`,
+            url,
+        ]);
+
+        const audioPath = `${tmpFile}.mp3`;
+
+        if (!fs.existsSync(audioPath)) {
+            throw new Error('Audio download failed.');
+        }
+
+        const fileSize = fs.statSync(audioPath).size;
+        console.log(`Audio downloaded: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
+
+        if (fileSize > 25 * 1024 * 1024) {
+            fs.unlinkSync(audioPath);
+            return res.status(400).json({ error: 'Audio too large (max 25MB). Try a shorter video.' });
+        }
+
+        const transcription = await openai.audio.transcriptions.create({
+            file: fs.createReadStream(audioPath),
+            model: 'whisper-1',
+            response_format: 'text',
+        });
+
+        fs.unlinkSync(audioPath);
+
+        console.log(`Whisper success for ${id}: ${transcription.length} chars`);
+        res.json({ text: transcription, translateLangs: TRANSLATE_LANGS });
+
+    } catch (err) {
+        try { fs.unlinkSync(`${tmpFile}.mp3`); } catch (_) {}
+        console.log('Whisper error:', err.message);
+        res.status(500).json({ error: 'Transcription failed. Try again.' });
+    }
+});
+
+// ─── API: POST /api/translate ───────────────────────────────────────────────
+app.post('/api/translate', aiLimiter, async (req, res) => {
+    const { text, targetLang } = req.body;
+
+    if (!text || typeof text !== 'string') {
+        return res.status(400).json({ error: 'Missing text.' });
+    }
+
+    if (!targetLang || !VALID_TRANSLATE_CODES.has(targetLang)) {
+        return res.status(400).json({ error: 'Invalid target language.' });
+    }
+
+    // Cap text length to prevent abuse (roughly ~2 hours of transcript)
+    const MAX_CHARS = 100_000;
+    const trimmedText = text.slice(0, MAX_CHARS);
+
+    const langName = TRANSLATE_LANGS.find(l => l.code === targetLang)?.name || targetLang;
+
+    try {
+        console.log(`Translating to ${langName} (${trimmedText.length} chars)`);
+
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: `You are a professional translator. Translate the following transcript text to ${langName}. 
+                    Return only the translated text with no explanations, no notes, no formatting — just the translation.
+                    Preserve the natural flow of the text.`,
+                },
+                {
+                    role: 'user',
+                    content: trimmedText,
+                },
+            ],
+            temperature: 0.3,
+        });
+
+        const translated = completion.choices[0].message.content;
+        console.log(`Translation done: ${translated.length} chars`);
+
+        res.json({ text: translated });
+
+    } catch (err) {
+        console.log('Translation error:', err.message);
+        res.status(500).json({ error: 'Translation failed. Try again.' });
+    }
+});
+
+// ─── Parse VTT/SRT/XML to plain text ────────────────────────────────────────
 function parseSubtitleToText(content) {
     if (content.includes('<text')) {
         const segments = [];
@@ -178,13 +314,9 @@ function parseSubtitleToText(content) {
         const pattern = /<text[^>]*>([\s\S]*?)<\/text>/g;
         while ((m = pattern.exec(content)) !== null) {
             const text = m[1]
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&#39;/g, "'")
-                .replace(/&quot;/g, '"')
-                .replace(/\n/g, ' ')
-                .trim();
+                .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+                .replace(/&#39;/g, "'").replace(/&quot;/g, '"')
+                .replace(/\n/g, ' ').trim();
             if (text) segments.push(text);
         }
         return segments.join(' ');
@@ -204,12 +336,8 @@ function parseSubtitleToText(content) {
 
         let cleaned = trimmed
             .replace(/<[^>]+>/g, '')
-            .replace(/&amp;/g, '&')
-            .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>')
-            .replace(/&#39;/g, "'")
-            .replace(/&quot;/g, '"')
-            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+            .replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ')
             .trim();
 
         if (cleaned && !seen.has(cleaned)) {

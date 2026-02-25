@@ -27,6 +27,7 @@
             --text-2:     #a1a1aa;
             --text-3:     #52525b;
             --success:    #4ade80;
+            --warning:    #fbbf24;
             --radius:     10px;
         }
 
@@ -46,7 +47,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ── Header ─────────────────────────────── */
         header {
             text-align: center;
             margin-bottom: 52px;
@@ -90,7 +90,6 @@
             text-transform: uppercase;
         }
 
-        /* ── Main card ───────────────────────────── */
         .card {
             width: 100%;
             max-width: 680px;
@@ -100,7 +99,6 @@
             padding: 28px;
         }
 
-        /* ── Input row ───────────────────────────── */
         .input-wrap {
             display: flex;
             gap: 10px;
@@ -147,7 +145,6 @@
         .btn-primary:active { transform: scale(0.97); }
         .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
-        /* ── Language tabs ───────────────────────── */
         .lang-row {
             display: flex;
             gap: 6px;
@@ -180,7 +177,43 @@
             color: var(--accent);
         }
 
-        /* ── Status bar ──────────────────────────── */
+        .whisper-banner {
+            display: none;
+            background: var(--surface-2);
+            border: 1px solid var(--border-2);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+        }
+
+        .whisper-banner p {
+            font-size: 0.8rem;
+            color: var(--text-2);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .whisper-banner p strong {
+            color: var(--text);
+        }
+
+        .btn-whisper {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-family: 'Geist', sans-serif;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+
+        .btn-whisper:hover  { opacity: 0.88; }
+        .btn-whisper:active { transform: scale(0.97); }
+        .btn-whisper:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
         #status {
             display: flex;
             align-items: center;
@@ -195,7 +228,6 @@
         #status.err  { color: var(--accent); }
         #status.ok   { color: var(--success); }
 
-        /* ── Toolbar ─────────────────────────────── */
         .toolbar {
             display: none;
             justify-content: space-between;
@@ -229,12 +261,11 @@
             color: var(--text);
         }
 
-        /* ── Download dropdown ───────────────────── */
-        .download-wrap {
+        .download-wrap, .translate-wrap {
             position: relative;
         }
 
-        .download-menu {
+        .download-menu, .translate-menu {
             display: none;
             position: absolute;
             top: 100%;
@@ -248,11 +279,19 @@
             min-width: 120px;
         }
 
-        .download-menu.show {
+        .translate-menu {
+            min-width: 160px;
+            max-height: 240px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .download-menu.show, .translate-menu.show {
             display: block;
         }
 
-        .download-option {
+        .download-option, .translate-option {
             display: block;
             width: 100%;
             background: none;
@@ -268,12 +307,11 @@
             transition: all 0.12s;
         }
 
-        .download-option:hover {
+        .download-option:hover, .translate-option:hover {
             background: var(--border);
             color: var(--text);
         }
 
-        /* ── Transcript output ───────────────────── */
         #output {
             display: none;
             background: var(--bg);
@@ -292,7 +330,6 @@
             scrollbar-color: var(--border) transparent;
         }
 
-        /* ── Spinner ─────────────────────────────── */
         .spinner {
             width: 13px;
             height: 13px;
@@ -305,7 +342,98 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Footer ──────────────────────────────── */
+        /* ── History section ─────────────────────── */
+        .history-card {
+            width: 100%;
+            max-width: 680px;
+            margin-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .history-title {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-3);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .history-clear {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            font-family: 'Geist', sans-serif;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        .history-clear:hover {
+            color: var(--accent);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+
+        .history-item:hover {
+            border-color: var(--border-2);
+        }
+
+        .history-thumb {
+            width: 48px;
+            height: 36px;
+            border-radius: 5px;
+            background: var(--surface-2);
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .history-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-vid-id {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-date {
+            font-size: 0.7rem;
+            color: var(--text-3);
+        }
+
+        .history-words {
+            font-size: 0.7rem;
+            color: var(--text-3);
+            white-space: nowrap;
+        }
+
         footer {
             margin-top: 36px;
             text-align: center;
@@ -328,11 +456,9 @@
 </head>
 <body>
 
-<!-- ── Header ──────────────────────────────────────────── -->
 <header>
     <div class="logo">
         <div class="logo-icon">
-            <!-- Simple caption/text icon — edit this SVG to change the logo -->
             <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <rect x="2" y="5" width="16" height="2.5" rx="1.25"/>
                 <rect x="2" y="9.5" width="11" height="2.5" rx="1.25"/>
@@ -344,23 +470,19 @@
     <p class="tagline">YouTube transcript, instantly</p>
 </header>
 
-<!-- ── Main card ────────────────────────────────────────── -->
 <div class="card">
 
     <div class="input-wrap">
-        <input
-                type="text"
-                id="urlInput"
-                placeholder="Paste YouTube URL or video ID…"
-                autocomplete="off"
-                spellcheck="false"
-        >
-        <button class="btn-primary" id="fetchBtn" onclick="fetchTranscript()">
-            Get transcript
-        </button>
+        <input type="text" id="urlInput" placeholder="Paste YouTube URL or video ID…" autocomplete="off" spellcheck="false">
+        <button class="btn-primary" id="fetchBtn" onclick="fetchTranscript()">Get transcript</button>
     </div>
 
     <div class="lang-row" id="langRow"></div>
+
+    <div class="whisper-banner" id="whisperBanner">
+        <p><strong>No captions found.</strong> This video has no subtitles — but we can generate a transcript from the audio. This may take up to a minute.</p>
+        <button class="btn-whisper" id="whisperBtn" onclick="runWhisper()">Generate transcript</button>
+    </div>
 
     <div id="status"></div>
 
@@ -368,6 +490,10 @@
         <span class="meta" id="metaText"></span>
         <div class="toolbar-actions">
             <button class="btn-sm" onclick="copyText(event)">Copy</button>
+            <div class="translate-wrap">
+                <button class="btn-sm" id="translateBtn" onclick="toggleTranslateMenu(event)" style="display:none;">Translate ▾</button>
+                <div class="translate-menu" id="translateMenu"></div>
+            </div>
             <div class="download-wrap">
                 <button class="btn-sm" onclick="toggleDownloadMenu(event)">Download ▾</button>
                 <div class="download-menu" id="downloadMenu">
@@ -383,7 +509,15 @@
 
 </div>
 
-<!-- ── Footer ───────────────────────────────────────────── -->
+<!-- History section -->
+<div class="history-card" id="historyCard" style="display:none;">
+    <div class="history-header">
+        <span class="history-title">Recent</span>
+        <button class="history-clear" onclick="clearHistory()">Clear</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+</div>
+
 <footer>
     Built by <a href="https://github.com/gl1z" target="_blank">@gl1z</a>
     &nbsp;·&nbsp;
@@ -391,39 +525,88 @@
 </footer>
 
 <script>
-    // ── State ───────────────────────────────────────────────
-    let currentText    = '';
-    let currentVideoId = '';
-    let captionTracks  = [];
+    // ────────────────────────────────────────────────────────
+    // State
+    // ────────────────────────────────────────────────────────
+    var currentText    = '';
+    var originalText   = '';
+    var currentVideoId = '';
+    var captionTracks  = [];
+    var translateLangs = [];
+    var isTranslated   = false;
 
-    // ── Helpers ─────────────────────────────────────────────
+    // ────────────────────────────────────────────────────────
+    // Helpers
+    // ────────────────────────────────────────────────────────
     function extractVideoId(input) {
         input = input.trim();
-        const patterns = [
+        var patterns = [
             /(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/,
             /^([A-Za-z0-9_-]{11})$/,
         ];
-        for (const p of patterns) {
-            const m = input.match(p);
+        for (var i = 0; i < patterns.length; i++) {
+            var m = input.match(patterns[i]);
             if (m) return m[1];
         }
         return null;
     }
 
-    function setStatus(html, type = '') {
-        const el   = document.getElementById('status');
-        el.className = type;
+    function setStatus(html, type) {
+        var el = document.getElementById('status');
+        el.className = type || '';
         el.innerHTML = html;
     }
 
     function showSpinner(msg) {
-        setStatus(`<div class="spinner"></div><span>${msg}</span>`);
+        setStatus('<div class="spinner"></div><span>' + msg + '</span>');
     }
 
-    // ── Step 1: Get caption tracks from backend ──────────
-    async function fetchTranscript() {
-        const input   = document.getElementById('urlInput').value;
-        const videoId = extractVideoId(input);
+    function resetUI() {
+        document.getElementById('langRow').innerHTML = '';
+        document.getElementById('output').style.display = 'none';
+        document.getElementById('toolbar').style.display = 'none';
+        document.getElementById('whisperBanner').style.display = 'none';
+        document.getElementById('translateBtn').style.display = 'none';
+        document.getElementById('translateMenu').classList.remove('show');
+        document.getElementById('downloadMenu').classList.remove('show');
+        isTranslated = false;
+    }
+
+    // ────────────────────────────────────────────────────────
+    // Show transcript in the output box
+    // ────────────────────────────────────────────────────────
+    function showTranscript(text, langs) {
+        currentText  = text;
+        originalText = text;
+        isTranslated = false;
+
+        var wordCount = text.split(/\s+/).filter(Boolean).length;
+        document.getElementById('metaText').textContent = wordCount.toLocaleString() + ' words';
+
+        var out = document.getElementById('output');
+        out.textContent   = text;
+        out.style.display = 'block';
+
+        document.getElementById('toolbar').style.display = 'flex';
+        setStatus('Transcript ready', 'ok');
+
+        // set up the translate dropdown if the server sent language options
+        if (langs && langs.length > 0) {
+            translateLangs = langs;
+            buildTranslateMenu(langs);
+            document.getElementById('translateBtn').style.display = '';
+        }
+
+        // save to history
+        saveToHistory(currentVideoId, text, wordCount);
+    }
+
+    // ────────────────────────────────────────────────────────
+    // Step 1 — ask the server what caption tracks exist
+    // ────────────────────────────────────────────────────────
+    function fetchTranscript() {
+        var input   = document.getElementById('urlInput').value;
+        var videoId = extractVideoId(input);
 
         if (!videoId) {
             setStatus('Paste a valid YouTube URL or video ID.', 'err');
@@ -432,174 +615,357 @@
 
         currentVideoId = videoId;
         document.getElementById('fetchBtn').disabled = true;
-        document.getElementById('langRow').innerHTML  = '';
-        document.getElementById('output').style.display  = 'none';
-        document.getElementById('toolbar').style.display = 'none';
+        resetUI();
         showSpinner('Fetching video info…');
 
-        try {
-            const res  = await fetch(`/api/transcript?id=${videoId}`);
-            const data = await res.json();
+        fetch('/api/transcript?id=' + videoId)
+            .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+            .then(function(result) {
+                if (!result.ok) throw new Error(result.data.error || 'Something went wrong.');
 
-            if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+                captionTracks = result.data.tracks;
 
-            captionTracks = data.tracks;
+                // no captions on this video — offer whisper
+                if (captionTracks.length === 0 && result.data.whisperAvailable) {
+                    setStatus('');
+                    document.getElementById('whisperBanner').style.display = 'block';
+                    document.getElementById('fetchBtn').disabled = false;
+                    return;
+                }
 
-            // Render language buttons
-            const langRow = document.getElementById('langRow');
-            captionTracks.forEach((track, i) => {
-                const btn = document.createElement('button');
-                btn.className   = 'lang-btn' + (i === 0 ? ' active' : '');
-                btn.textContent = track.name + (track.isAutoGenerated ? ' (auto)' : '');
-                btn.onclick     = () => loadCaption(i, btn);
-                langRow.appendChild(btn);
+                // build a button for each available language
+                var langRow = document.getElementById('langRow');
+                for (var i = 0; i < captionTracks.length; i++) {
+                    (function(idx) {
+                        var btn = document.createElement('button');
+                        btn.className   = 'lang-btn' + (idx === 0 ? ' active' : '');
+                        btn.textContent = captionTracks[idx].name;
+                        btn.onclick     = function() { loadCaption(idx, btn); };
+                        langRow.appendChild(btn);
+                    })(i);
+                }
+
+                // load the first one automatically
+                loadCaption(0);
+            })
+            .catch(function(err) {
+                setStatus(err.message, 'err');
+                document.getElementById('fetchBtn').disabled = false;
             });
-
-            // Auto-load the first track
-            await loadCaption(0);
-
-        } catch (err) {
-            setStatus(err.message, 'err');
-            document.getElementById('fetchBtn').disabled = false;
-        }
     }
 
-    // ── Step 2: Fetch the actual text for a chosen track ────
-    async function loadCaption(index, btn) {
+    // ────────────────────────────────────────────────────────
+    // Step 2 — download the actual subtitle text
+    // ────────────────────────────────────────────────────────
+    function loadCaption(index, btn) {
         if (btn) {
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            var all = document.querySelectorAll('.lang-btn');
+            for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
             btn.classList.add('active');
         }
 
         showSpinner('Loading transcript…');
 
-        try {
-            const track = captionTracks[index];
-            const res   = await fetch(`/api/caption?id=${currentVideoId}&lang=${track.languageCode}`);
-            const data  = await res.json();
+        var track = captionTracks[index];
 
-            if (!res.ok) throw new Error(data.error || 'Failed to load transcript.');
-
-            currentText = data.text;
-
-            const wordCount = currentText.split(/\s+/).filter(Boolean).length;
-            document.getElementById('metaText').textContent =
-                `${wordCount.toLocaleString()} words`;
-
-            const out       = document.getElementById('output');
-            out.textContent = currentText;
-            out.style.display = 'block';
-
-            document.getElementById('toolbar').style.display = 'flex';
-            setStatus('Transcript ready', 'ok');
-
-        } catch (err) {
-            setStatus(err.message, 'err');
-        }
-
-        document.getElementById('fetchBtn').disabled = false;
+        fetch('/api/caption?id=' + currentVideoId + '&lang=' + track.languageCode)
+            .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+            .then(function(result) {
+                if (!result.ok) throw new Error(result.data.error || 'Failed to load transcript.');
+                showTranscript(result.data.text, result.data.translateLangs);
+            })
+            .catch(function(err) {
+                setStatus(err.message + ' — you can try AI transcription instead.', 'err');
+                document.getElementById('whisperBanner').style.display = 'block';
+            })
+            .finally(function() {
+                document.getElementById('fetchBtn').disabled = false;
+            });
     }
 
-    // ── Actions ──────────────────────────────────────────────
+    // ────────────────────────────────────────────────────────
+    // Step 3 — whisper fallback (no captions on this video)
+    // ────────────────────────────────────────────────────────
+    function runWhisper() {
+        document.getElementById('whisperBtn').disabled = true;
+        document.getElementById('whisperBanner').style.display = 'none';
+        showSpinner('Generating transcript — this can take up to a minute…');
+
+        fetch('/api/whisper', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: currentVideoId }),
+        })
+            .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+            .then(function(result) {
+                if (!result.ok) throw new Error(result.data.error || 'Transcription failed.');
+                showTranscript(result.data.text, result.data.translateLangs);
+            })
+            .catch(function(err) {
+                setStatus(err.message, 'err');
+                document.getElementById('whisperBanner').style.display = 'block';
+            })
+            .finally(function() {
+                document.getElementById('whisperBtn').disabled = false;
+                document.getElementById('fetchBtn').disabled   = false;
+            });
+    }
+
+    // ────────────────────────────────────────────────────────
+    // Translate
+    // ────────────────────────────────────────────────────────
+    function buildTranslateMenu(langs) {
+        var menu = document.getElementById('translateMenu');
+        menu.innerHTML = '';
+
+        // "show original" sits at the top, hidden until a translation happens
+        var origBtn = document.createElement('button');
+        origBtn.className     = 'translate-option';
+        origBtn.textContent   = '↩ Show original';
+        origBtn.id            = 'showOriginalBtn';
+        origBtn.style.display = 'none';
+        origBtn.onclick = function() {
+            currentText  = originalText;
+            isTranslated = false;
+            document.getElementById('output').textContent = originalText;
+            origBtn.style.display = 'none';
+            menu.classList.remove('show');
+            var wc = originalText.split(/\s+/).filter(Boolean).length;
+            document.getElementById('metaText').textContent = wc.toLocaleString() + ' words';
+            setStatus('Transcript ready', 'ok');
+        };
+        menu.appendChild(origBtn);
+
+        for (var i = 0; i < langs.length; i++) {
+            (function(lang) {
+                var opt = document.createElement('button');
+                opt.className   = 'translate-option';
+                opt.textContent = lang.name;
+                opt.onclick     = function() { translateTo(lang.code, lang.name); };
+                menu.appendChild(opt);
+            })(langs[i]);
+        }
+    }
+
+    function translateTo(code, name) {
+        document.getElementById('translateMenu').classList.remove('show');
+        showSpinner('Translating to ' + name + '…');
+
+        fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: originalText, targetLang: code }),
+        })
+            .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+            .then(function(result) {
+                if (!result.ok) throw new Error(result.data.error || 'Translation failed.');
+
+                currentText  = result.data.text;
+                isTranslated = true;
+
+                document.getElementById('output').textContent = result.data.text;
+
+                var wc = result.data.text.split(/\s+/).filter(Boolean).length;
+                document.getElementById('metaText').textContent = wc.toLocaleString() + ' words · ' + name;
+
+                var origBtn = document.getElementById('showOriginalBtn');
+                if (origBtn) origBtn.style.display = '';
+
+                setStatus('Translated to ' + name, 'ok');
+            })
+            .catch(function(err) {
+                setStatus(err.message, 'err');
+            });
+    }
+
+    function toggleTranslateMenu(e) {
+        e.stopPropagation();
+        document.getElementById('downloadMenu').classList.remove('show');
+        document.getElementById('translateMenu').classList.toggle('show');
+    }
+
+    // ────────────────────────────────────────────────────────
+    // Copy
+    // ────────────────────────────────────────────────────────
     function copyText(e) {
-        navigator.clipboard.writeText(currentText).then(() => {
-            const btn  = e?.target || document.querySelector('.btn-sm');
-            const orig = btn.textContent;
+        navigator.clipboard.writeText(currentText).then(function() {
+            var btn  = e ? e.target : document.querySelector('.btn-sm');
+            var orig = btn.textContent;
             btn.textContent = 'Copied!';
-            setTimeout(() => (btn.textContent = orig), 1600);
+            setTimeout(function() { btn.textContent = orig; }, 1600);
         });
     }
 
-    // ── Download dropdown ────────────────────────────────────
+    // ────────────────────────────────────────────────────────
+    // Download
+    // ────────────────────────────────────────────────────────
     function toggleDownloadMenu(e) {
         e.stopPropagation();
-        const menu = document.getElementById('downloadMenu');
-        menu.classList.toggle('show');
+        document.getElementById('translateMenu').classList.remove('show');
+        document.getElementById('downloadMenu').classList.toggle('show');
     }
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', () => {
-        document.getElementById('downloadMenu')?.classList.remove('show');
+    document.addEventListener('click', function() {
+        document.getElementById('downloadMenu').classList.remove('show');
+        document.getElementById('translateMenu').classList.remove('show');
     });
 
     function downloadAs(format) {
         document.getElementById('downloadMenu').classList.remove('show');
-        const filename = `capty-${currentVideoId}`;
+        var filename = 'capty-' + currentVideoId;
 
         if (format === 'txt') {
-            const blob = new Blob([currentText], { type: 'text/plain' });
-            downloadBlob(blob, `${filename}.txt`);
+            var blob = new Blob([currentText], { type: 'text/plain' });
+            downloadBlob(blob, filename + '.txt');
         }
 
         if (format === 'pdf') {
-            // Generate a simple PDF using browser print
-            const win = window.open('', '_blank');
-            win.document.write(`
-                <html>
-                <head>
-                    <title>${filename}</title>
-                    <style>
-                        body {
-                            font-family: 'Segoe UI', 'Noto Sans', Arial, sans-serif;
-                            font-size: 13px;
-                            line-height: 1.8;
-                            padding: 40px;
-                            color: #222;
-                            max-width: 700px;
-                        }
-                        h1 {
-                            font-size: 16px;
-                            color: #666;
-                            margin-bottom: 20px;
-                            border-bottom: 1px solid #ddd;
-                            padding-bottom: 10px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1>Capty Transcript — ${currentVideoId}</h1>
-                    <p>${currentText.replace(/\n/g, '<br>')}</p>
-                </body>
-                </html>
-            `);
+            var win = window.open('', '_blank');
+            win.document.write(
+                '<html><head><title>' + filename + '</title>' +
+                '<style>body{font-family:"Segoe UI","Noto Sans",Arial,sans-serif;font-size:13px;line-height:1.8;padding:40px;color:#222;max-width:700px}' +
+                'h1{font-size:16px;color:#666;margin-bottom:20px;border-bottom:1px solid #ddd;padding-bottom:10px}</style>' +
+                '</head><body><h1>Capty Transcript — ' + currentVideoId + '</h1>' +
+                '<p>' + currentText.replace(/\n/g, '<br>') + '</p></body></html>'
+            );
             win.document.close();
-            setTimeout(() => { win.print(); }, 400);
+            setTimeout(function() { win.print(); }, 400);
         }
 
         if (format === 'docx') {
-            // Generate a minimal .docx (Word) file
-            // .docx is a zip of XML files — we create a simple one
-            const docContent = `
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:body>
-    <w:p><w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>Capty Transcript — ${currentVideoId}</w:t></w:r></w:p>
-    <w:p><w:r><w:t></w:t></w:r></w:p>
-    ${currentText.split(/\n+/).map(para =>
-                `<w:p><w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">${para.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</w:t></w:r></w:p>`
-            ).join('\n')}
-  </w:body>
-</w:document>`.trim();
-
-            // For a proper .docx we'd need a zip library.
-            // Instead, download as .doc (Word can open this XML format)
-            const blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-            downloadBlob(blob, `${filename}.doc`);
+            var paragraphs = currentText.split(/\n+/);
+            var xmlParts = [];
+            for (var i = 0; i < paragraphs.length; i++) {
+                var safe = paragraphs[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                xmlParts.push('<w:p><w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">' + safe + '</w:t></w:r></w:p>');
+            }
+            var docContent =
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+                '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' +
+                '<w:p><w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>Capty Transcript — ' + currentVideoId + '</w:t></w:r></w:p>' +
+                '<w:p><w:r><w:t></w:t></w:r></w:p>' +
+                xmlParts.join('') +
+                '</w:body></w:document>';
+            var blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            downloadBlob(blob, filename + '.doc');
         }
     }
 
     function downloadBlob(blob, name) {
-        const a  = document.createElement('a');
-        a.href   = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href     = URL.createObjectURL(blob);
         a.download = name;
         a.click();
         URL.revokeObjectURL(a.href);
     }
 
-    // ── Enter key ────────────────────────────────────────────
-    document.getElementById('urlInput').addEventListener('keydown', (e) => {
+    // ────────────────────────────────────────────────────────
+    // History (localStorage)
+    // ────────────────────────────────────────────────────────
+    var HISTORY_KEY = 'capty_history';
+    var MAX_HISTORY = 10;
+
+    function getHistory() {
+        try {
+            var raw = localStorage.getItem(HISTORY_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveToHistory(videoId, text, wordCount) {
+        var history = getHistory();
+
+        // don't duplicate — remove old entry for this video if it exists
+        history = history.filter(function(item) { return item.id !== videoId; });
+
+        // add to the front
+        history.unshift({
+            id: videoId,
+            words: wordCount,
+            date: new Date().toISOString(),
+            preview: text.slice(0, 120),
+        });
+
+        // cap it
+        if (history.length > MAX_HISTORY) {
+            history = history.slice(0, MAX_HISTORY);
+        }
+
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        var history = getHistory();
+        var card    = document.getElementById('historyCard');
+        var list    = document.getElementById('historyList');
+
+        if (history.length === 0) {
+            card.style.display = 'none';
+            return;
+        }
+
+        card.style.display = 'block';
+        list.innerHTML = '';
+
+        for (var i = 0; i < history.length; i++) {
+            (function(item) {
+                var row = document.createElement('div');
+                row.className = 'history-item';
+                row.onclick = function() {
+                    document.getElementById('urlInput').value = item.id;
+                    fetchTranscript();
+                };
+
+                var thumb = document.createElement('img');
+                thumb.className = 'history-thumb';
+                thumb.src = 'https://i.ytimg.com/vi/' + item.id + '/default.jpg';
+                thumb.alt = '';
+                thumb.loading = 'lazy';
+
+                var info = document.createElement('div');
+                info.className = 'history-info';
+
+                var vidId = document.createElement('div');
+                vidId.className   = 'history-vid-id';
+                vidId.textContent = item.id;
+
+                var date = document.createElement('div');
+                date.className   = 'history-date';
+                var d = new Date(item.date);
+                date.textContent = d.toLocaleDateString();
+
+                info.appendChild(vidId);
+                info.appendChild(date);
+
+                var words = document.createElement('span');
+                words.className   = 'history-words';
+                words.textContent = item.words.toLocaleString() + ' words';
+
+                row.appendChild(thumb);
+                row.appendChild(info);
+                row.appendChild(words);
+                list.appendChild(row);
+            })(history[i]);
+        }
+    }
+
+    function clearHistory() {
+        localStorage.removeItem(HISTORY_KEY);
+        renderHistory();
+    }
+
+    // ────────────────────────────────────────────────────────
+    // Init
+    // ────────────────────────────────────────────────────────
+    document.getElementById('urlInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') fetchTranscript();
     });
+
+    // show history on page load
+    renderHistory();
 </script>
 
 </body>

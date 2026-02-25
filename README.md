@@ -1,67 +1,57 @@
 # Capty
 
-Get the transcript of any YouTube video instantly. Free, no signup, no BS.
-
 **[Live Demo →](https://capty.onrender.com)** *(https://capty-izpe.onrender.com)*
 
 ![screenshot](https://github.com/user-attachments/assets/placeholder)
 
-## Features
+Paste a YouTube link, get the transcript. That's it.
 
-- Paste any YouTube URL → get the transcript
-- Multiple languages (English, Spanish, German, Japanese, Chinese, Russian)
-- Copy to clipboard
-- Download as .txt, .pdf, or .doc
-- Clean, minimal dark UI
-- No API keys required
+Works with any video that has captions. If there are no captions, it can transcribe the audio using OpenAI Whisper. You can also translate the result into other languages.
 
-## Run Locally
+## Setup
 
-**Requirements:** [Node.js](https://nodejs.org/) + [Python 3](https://python.org/) + [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+You need Node.js 20+, Python 3 with yt-dlp installed, and an OpenAI API key.
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/gl1z/capty.git
 cd capty
-
-# 2. Install dependencies
 npm install
-pip install yt-dlp
-
-# 3. Start the server
-npm run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000)
+Create a `.env` file in the root:
 
-## Deploy with Docker
+```
+OPENAI_API_KEY=sk-your-key-here
+```
+
+Then run it:
+
+```bash
+npm start
+```
+
+Goes to `http://localhost:3000`.
+
+### Docker
 
 ```bash
 docker build -t capty .
-docker run -p 3000:3000 capty
+docker run -p 3000:3000 -e OPENAI_API_KEY=sk-your-key-here capty
 ```
 
-Or deploy to [Render](https://render.com), [Railway](https://railway.app), or any platform that supports Docker.
+## What it does
 
-## How It Works
+Pulls existing captions from YouTube via yt-dlp. Falls back to Whisper if the video has no subtitles. Translates transcripts using GPT-4o-mini. Lets you copy or download as .txt, .pdf, or .docx.
 
-1. User pastes a YouTube URL
-2. Backend uses `yt-dlp` to fetch available subtitle tracks
-3. User selects a language
-4. Backend downloads the subtitle file and parses it to plain text
-5. Frontend displays the transcript with copy/download options
+## Env vars
 
-## Stack
+`OPENAI_API_KEY` — required, get one from platform.openai.com
 
-- **Frontend** — Vanilla HTML/CSS/JS, Geist + Noto Sans fonts
-- **Backend** — Node.js, Express
-- **Subtitles** — [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+`PORT` — optional, defaults to 3000
 
 ## License
 
-MIT
-
----
+MIT---
 
 Built by [@gl1z](https://github.com/gl1z)
 
