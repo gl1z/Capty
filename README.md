@@ -2,7 +2,7 @@
 
 **[Live Demo →](https://capty.onrender.com)** *(https://capty-izpe.onrender.com)*
 
-![screenshot](https://github.com/user-attachments/assets/placeholder)
+![![img.png](img.png)](https://github.com/user-attachments/assets/placeholder)
 
 Paste a YouTube link, get the transcript. That's it.
 
