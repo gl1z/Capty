@@ -21,30 +21,29 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.json({ limit: '1mb' }));  // was 50mb — way too high, 1mb is plenty for text
+app.use(express.json({ limit: '1mb' }));
 
 // ─── Rate limiting ─────────────────────────────────────────────────────────
 const limiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 15,
+    max: 12,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests. Please wait a moment.' },
 });
 
-// Stricter limit for expensive AI endpoints
 const aiLimiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 5,
+    max: 4,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: 'AI request limit reached. Wait a minute.' },
+    message: { error: 'Rate limit hit. Wait a minute.' },
 });
 
 app.use('/api/', limiter);
 app.use(express.static(path.join(__dirname)));
 
-// ─── Helper: run yt-dlp ─────────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────
 function runYtDlp(args) {
     return new Promise((resolve, reject) => {
         execFile('yt-dlp', args, { maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
@@ -58,17 +57,16 @@ function runYtDlp(args) {
     });
 }
 
-// ─── Input validation ──────────────────────────────────────────────────────
-function isValidVideoId(id) {
+function validVideoId(id) {
     return typeof id === 'string' && /^[A-Za-z0-9_-]{11}$/.test(id);
 }
 
-function isValidLangCode(lang) {
+function validLangCode(lang) {
     return typeof lang === 'string' && /^[a-zA-Z]{2}(-[a-zA-Z]{2,10})?$/.test(lang);
 }
 
 // ─── Language config ────────────────────────────────────────────────────────
-const LANG_NAMES = {
+const langMap = {
     en: 'English', es: 'Spanish', de: 'German', ja: 'Japanese',
     zh: 'Chinese', ru: 'Russian', fr: 'French', pt: 'Portuguese',
     ko: 'Korean', ar: 'Arabic', hi: 'Hindi', it: 'Italian',
@@ -78,20 +76,20 @@ const LANG_NAMES = {
     'de-DE': 'German (Germany)',
 };
 
-const ALLOWED_LANGS = new Set([
+const supportedLangs = new Set([
     'en', 'es', 'de', 'ja', 'zh', 'ru',
     'pt-BR', 'es-419', 'de-DE', 'zh-Hans', 'zh-Hant',
 ]);
 
-const TRANSLATE_LANGS = [
+const translateOptions = [
     { code: 'es', name: 'Spanish' },
     { code: 'fr', name: 'French' },
     { code: 'de', name: 'German' },
+    { code: 'ja', name: 'Japanese' },
+    { code: 'ko', name: 'Korean' },
     { code: 'it', name: 'Italian' },
     { code: 'pt', name: 'Portuguese' },
     { code: 'ru', name: 'Russian' },
-    { code: 'ja', name: 'Japanese' },
-    { code: 'ko', name: 'Korean' },
     { code: 'zh', name: 'Chinese (Simplified)' },
     { code: 'ar', name: 'Arabic' },
     { code: 'hi', name: 'Hindi' },
@@ -101,17 +99,17 @@ const TRANSLATE_LANGS = [
     { code: 'sv', name: 'Swedish' },
 ];
 
-const VALID_TRANSLATE_CODES = new Set(TRANSLATE_LANGS.map(l => l.code));
+const translateCodes = new Set(translateOptions.map(l => l.code));
 
 function getLangName(code) {
-    return LANG_NAMES[code] || code;
+    return langMap[code] || code;
 }
 
-// ─── API: GET /api/transcript?id=VIDEO_ID ───────────────────────────────────
+// ─── GET /api/transcript ────────────────────────────────────────────────────
 app.get('/api/transcript', async (req, res) => {
     const { id } = req.query;
 
-    if (!isValidVideoId(id)) {
+    if (!validVideoId(id)) {
         return res.status(400).json({ error: 'Invalid video ID.' });
     }
 
@@ -123,7 +121,7 @@ app.get('/api/transcript', async (req, res) => {
 
         if (info.subtitles) {
             for (const lang of Object.keys(info.subtitles)) {
-                if (ALLOWED_LANGS.has(lang)) {
+                if (supportedLangs.has(lang)) {
                     tracks.push({
                         languageCode: lang,
                         name: getLangName(lang),
@@ -148,22 +146,22 @@ app.get('/api/transcript', async (req, res) => {
             return res.json({ tracks: [], whisperAvailable: true });
         }
 
-        console.log(`Found ${tracks.length} tracks for ${id}`);
+        console.log(`[transcript] ${tracks.length} tracks for ${id}`);
         res.json({ tracks, whisperAvailable: false });
 
     } catch (err) {
-        console.log('Transcript error:', err.message);
-        res.status(500).json({ error: 'Failed to fetch video info.' });  // don't leak internal errors
+        console.log('[transcript] error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch video info.' });
     }
 });
 
-// ─── API: GET /api/caption?id=VIDEO_ID&lang=LANG ────────────────────────────
+// ─── GET /api/caption ───────────────────────────────────────────────────────
 app.get('/api/caption', async (req, res) => {
     const { id, lang } = req.query;
 
-    if (!isValidVideoId(id)) return res.status(400).json({ error: 'Invalid video ID.' });
+    if (!validVideoId(id)) return res.status(400).json({ error: 'Invalid video ID.' });
 
-    const language = (lang && isValidLangCode(lang)) ? lang : 'en';
+    const language = (lang && validLangCode(lang)) ? lang : 'en';
     const url      = `https://www.youtube.com/watch?v=${id}`;
     const tmpFile  = path.join(os.tmpdir(), `capty-${id}-${Date.now()}`);
 
@@ -191,22 +189,22 @@ app.get('/api/caption', async (req, res) => {
 
         if (!subContent) throw new Error('No subtitle file produced.');
 
-        const text = parseSubtitleToText(subContent);
+        const text = parseSubs(subContent);
         if (!text) throw new Error('Could not parse subtitles.');
 
-        res.json({ text, translateLangs: TRANSLATE_LANGS });
+        res.json({ text, translateLangs: translateOptions });
 
     } catch (err) {
-        console.log('Caption error:', err.message);
+        console.log('[caption] error:', err.message);
         res.status(500).json({ error: 'Failed to load transcript.' });
     }
 });
 
-// ─── API: POST /api/whisper ─────────────────────────────────────────────────
+// ─── POST /api/whisper ──────────────────────────────────────────────────────
 app.post('/api/whisper', aiLimiter, async (req, res) => {
     const { id } = req.body;
 
-    if (!isValidVideoId(id)) {
+    if (!validVideoId(id)) {
         return res.status(400).json({ error: 'Invalid video ID.' });
     }
 
@@ -214,7 +212,7 @@ app.post('/api/whisper', aiLimiter, async (req, res) => {
     const tmpFile = path.join(os.tmpdir(), `capty-whisper-${id}-${Date.now()}`);
 
     try {
-        console.log(`Downloading audio for Whisper: ${id}`);
+        console.log(`[whisper] downloading audio: ${id}`);
 
         await runYtDlp([
             '--extract-audio',
@@ -232,14 +230,14 @@ app.post('/api/whisper', aiLimiter, async (req, res) => {
         }
 
         const fileSize = fs.statSync(audioPath).size;
-        console.log(`Audio downloaded: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
+        console.log(`[whisper] audio size: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
 
         if (fileSize > 25 * 1024 * 1024) {
             fs.unlinkSync(audioPath);
             return res.status(400).json({ error: 'Audio too large (max 25MB). Try a shorter video.' });
         }
 
-        const transcription = await openai.audio.transcriptions.create({
+        const result = await openai.audio.transcriptions.create({
             file: fs.createReadStream(audioPath),
             model: 'whisper-1',
             response_format: 'text',
@@ -247,17 +245,18 @@ app.post('/api/whisper', aiLimiter, async (req, res) => {
 
         fs.unlinkSync(audioPath);
 
-        console.log(`Whisper success for ${id}: ${transcription.length} chars`);
-        res.json({ text: transcription, translateLangs: TRANSLATE_LANGS });
+        console.log(`[whisper] done: ${id} (${result.length} chars)`);
+        res.json({ text: result, translateLangs: translateOptions });
 
     } catch (err) {
+        // clean up on error
         try { fs.unlinkSync(`${tmpFile}.mp3`); } catch (_) {}
-        console.log('Whisper error:', err.message);
+        console.log('[whisper] error:', err.message);
         res.status(500).json({ error: 'Transcription failed. Try again.' });
     }
 });
 
-// ─── API: POST /api/translate ───────────────────────────────────────────────
+// ─── POST /api/translate ────────────────────────────────────────────────────
 app.post('/api/translate', aiLimiter, async (req, res) => {
     const { text, targetLang } = req.body;
 
@@ -265,18 +264,16 @@ app.post('/api/translate', aiLimiter, async (req, res) => {
         return res.status(400).json({ error: 'Missing text.' });
     }
 
-    if (!targetLang || !VALID_TRANSLATE_CODES.has(targetLang)) {
+    if (!targetLang || !translateCodes.has(targetLang)) {
         return res.status(400).json({ error: 'Invalid target language.' });
     }
 
-    // Cap text length to prevent abuse (roughly ~2 hours of transcript)
-    const MAX_CHARS = 100_000;
-    const trimmedText = text.slice(0, MAX_CHARS);
-
-    const langName = TRANSLATE_LANGS.find(l => l.code === targetLang)?.name || targetLang;
+    const charLimit = 100_000;
+    const input = text.slice(0, charLimit);
+    const langName = translateOptions.find(l => l.code === targetLang)?.name || targetLang;
 
     try {
-        console.log(`Translating to ${langName} (${trimmedText.length} chars)`);
+        console.log(`[translate] → ${langName} (${input.length} chars)`);
 
         const completion = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
@@ -289,25 +286,25 @@ app.post('/api/translate', aiLimiter, async (req, res) => {
                 },
                 {
                     role: 'user',
-                    content: trimmedText,
+                    content: input,
                 },
             ],
             temperature: 0.3,
         });
 
         const translated = completion.choices[0].message.content;
-        console.log(`Translation done: ${translated.length} chars`);
+        console.log(`[translate] done (${translated.length} chars)`);
 
         res.json({ text: translated });
 
     } catch (err) {
-        console.log('Translation error:', err.message);
+        console.log('[translate] error:', err.message);
         res.status(500).json({ error: 'Translation failed. Try again.' });
     }
 });
 
-// ─── Parse VTT/SRT/XML to plain text ────────────────────────────────────────
-function parseSubtitleToText(content) {
+// ─── Subtitle parser ────────────────────────────────────────────────────────
+function parseSubs(content) {
     if (content.includes('<text')) {
         const segments = [];
         let m;
@@ -350,5 +347,5 @@ function parseSubtitleToText(content) {
 }
 
 app.listen(PORT, () => {
-    console.log(`Capty running → http://localhost:${PORT}`);
+    console.log(`Capty → http://localhost:${PORT}`);
 });

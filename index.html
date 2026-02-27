@@ -528,36 +528,36 @@
     // ────────────────────────────────────────────────────────
     // State
     // ────────────────────────────────────────────────────────
-    var currentText    = '';
-    var originalText   = '';
-    var currentVideoId = '';
-    var captionTracks  = [];
-    var translateLangs = [];
-    var isTranslated   = false;
+    let transcript = '';
+    let original   = '';
+    let videoId    = '';
+    let tracks     = [];
+    let langs      = [];
+    let translated = false;
 
     // ────────────────────────────────────────────────────────
     // Helpers
     // ────────────────────────────────────────────────────────
-    function extractVideoId(input) {
+    function parseVideoId(input) {
         input = input.trim();
-        var patterns = [
+        const patterns = [
             /(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/,
             /^([A-Za-z0-9_-]{11})$/,
         ];
-        for (var i = 0; i < patterns.length; i++) {
-            var m = input.match(patterns[i]);
+        for (let i = 0; i < patterns.length; i++) {
+            const m = input.match(patterns[i]);
             if (m) return m[1];
         }
         return null;
     }
 
     function setStatus(html, type) {
-        var el = document.getElementById('status');
+        const el = document.getElementById('status');
         el.className = type || '';
         el.innerHTML = html;
     }
 
-    function showSpinner(msg) {
+    function setLoading(msg) {
         setStatus('<div class="spinner"></div><span>' + msg + '</span>');
     }
 
@@ -569,83 +569,78 @@
         document.getElementById('translateBtn').style.display = 'none';
         document.getElementById('translateMenu').classList.remove('show');
         document.getElementById('downloadMenu').classList.remove('show');
-        isTranslated = false;
+        translated = false;
     }
 
     // ────────────────────────────────────────────────────────
-    // Show transcript in the output box
+    // Display result
     // ────────────────────────────────────────────────────────
-    function showTranscript(text, langs) {
-        currentText  = text;
-        originalText = text;
-        isTranslated = false;
+    function renderTranscript(text, langOptions) {
+        transcript = text;
+        original   = text;
+        translated = false;
 
-        var wordCount = text.split(/\s+/).filter(Boolean).length;
-        document.getElementById('metaText').textContent = wordCount.toLocaleString() + ' words';
+        const wc = text.split(/\s+/).filter(Boolean).length;
+        document.getElementById('metaText').textContent = wc.toLocaleString() + ' words';
 
-        var out = document.getElementById('output');
+        const out = document.getElementById('output');
         out.textContent   = text;
         out.style.display = 'block';
 
         document.getElementById('toolbar').style.display = 'flex';
-        setStatus('Transcript ready', 'ok');
+        setStatus('Done', 'ok');
 
-        // set up the translate dropdown if the server sent language options
-        if (langs && langs.length > 0) {
-            translateLangs = langs;
-            buildTranslateMenu(langs);
+        if (langOptions && langOptions.length > 0) {
+            langs = langOptions;
+            buildTranslateMenu(langOptions);
             document.getElementById('translateBtn').style.display = '';
         }
 
-        // save to history
-        saveToHistory(currentVideoId, text, wordCount);
+        saveToHistory(videoId, text, wc);
     }
 
     // ────────────────────────────────────────────────────────
-    // Step 1 — ask the server what caption tracks exist
+    // Fetch available caption tracks
     // ────────────────────────────────────────────────────────
     function fetchTranscript() {
-        var input   = document.getElementById('urlInput').value;
-        var videoId = extractVideoId(input);
+        const input = document.getElementById('urlInput').value;
+        const id    = parseVideoId(input);
 
-        if (!videoId) {
+        if (!id) {
             setStatus('Paste a valid YouTube URL or video ID.', 'err');
             return;
         }
 
-        currentVideoId = videoId;
+        videoId = id;
         document.getElementById('fetchBtn').disabled = true;
         resetUI();
-        showSpinner('Fetching video info…');
+        setLoading('Fetching video info…');
 
-        fetch('/api/transcript?id=' + videoId)
+        fetch('/api/transcript?id=' + id)
             .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
             .then(function(result) {
                 if (!result.ok) throw new Error(result.data.error || 'Something went wrong.');
 
-                captionTracks = result.data.tracks;
+                tracks = result.data.tracks;
 
-                // no captions on this video — offer whisper
-                if (captionTracks.length === 0 && result.data.whisperAvailable) {
+                if (tracks.length === 0 && result.data.whisperAvailable) {
                     setStatus('');
                     document.getElementById('whisperBanner').style.display = 'block';
                     document.getElementById('fetchBtn').disabled = false;
                     return;
                 }
 
-                // build a button for each available language
-                var langRow = document.getElementById('langRow');
-                for (var i = 0; i < captionTracks.length; i++) {
+                const langRow = document.getElementById('langRow');
+                for (let i = 0; i < tracks.length; i++) {
                     (function(idx) {
-                        var btn = document.createElement('button');
+                        const btn = document.createElement('button');
                         btn.className   = 'lang-btn' + (idx === 0 ? ' active' : '');
-                        btn.textContent = captionTracks[idx].name;
+                        btn.textContent = tracks[idx].name;
                         btn.onclick     = function() { loadCaption(idx, btn); };
                         langRow.appendChild(btn);
                     })(i);
                 }
 
-                // load the first one automatically
                 loadCaption(0);
             })
             .catch(function(err) {
@@ -655,24 +650,24 @@
     }
 
     // ────────────────────────────────────────────────────────
-    // Step 2 — download the actual subtitle text
+    // Load a specific caption track
     // ────────────────────────────────────────────────────────
     function loadCaption(index, btn) {
         if (btn) {
-            var all = document.querySelectorAll('.lang-btn');
-            for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
+            const all = document.querySelectorAll('.lang-btn');
+            for (let i = 0; i < all.length; i++) all[i].classList.remove('active');
             btn.classList.add('active');
         }
 
-        showSpinner('Loading transcript…');
+        setLoading('Pulling captions…');
 
-        var track = captionTracks[index];
+        const track = tracks[index];
 
-        fetch('/api/caption?id=' + currentVideoId + '&lang=' + track.languageCode)
+        fetch('/api/caption?id=' + videoId + '&lang=' + track.languageCode)
             .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
             .then(function(result) {
                 if (!result.ok) throw new Error(result.data.error || 'Failed to load transcript.');
-                showTranscript(result.data.text, result.data.translateLangs);
+                renderTranscript(result.data.text, result.data.translateLangs);
             })
             .catch(function(err) {
                 setStatus(err.message + ' — you can try AI transcription instead.', 'err');
@@ -684,22 +679,22 @@
     }
 
     // ────────────────────────────────────────────────────────
-    // Step 3 — whisper fallback (no captions on this video)
+    // Whisper fallback
     // ────────────────────────────────────────────────────────
     function runWhisper() {
         document.getElementById('whisperBtn').disabled = true;
         document.getElementById('whisperBanner').style.display = 'none';
-        showSpinner('Generating transcript — this can take up to a minute…');
+        setLoading('Generating transcript — this can take up to a minute…');
 
         fetch('/api/whisper', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: currentVideoId }),
+            body: JSON.stringify({ id: videoId }),
         })
             .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
             .then(function(result) {
                 if (!result.ok) throw new Error(result.data.error || 'Transcription failed.');
-                showTranscript(result.data.text, result.data.translateLangs);
+                renderTranscript(result.data.text, result.data.translateLangs);
             })
             .catch(function(err) {
                 setStatus(err.message, 'err');
@@ -714,61 +709,60 @@
     // ────────────────────────────────────────────────────────
     // Translate
     // ────────────────────────────────────────────────────────
-    function buildTranslateMenu(langs) {
-        var menu = document.getElementById('translateMenu');
+    function buildTranslateMenu(langOptions) {
+        const menu = document.getElementById('translateMenu');
         menu.innerHTML = '';
 
-        // "show original" sits at the top, hidden until a translation happens
-        var origBtn = document.createElement('button');
+        const origBtn = document.createElement('button');
         origBtn.className     = 'translate-option';
         origBtn.textContent   = '↩ Show original';
         origBtn.id            = 'showOriginalBtn';
         origBtn.style.display = 'none';
         origBtn.onclick = function() {
-            currentText  = originalText;
-            isTranslated = false;
-            document.getElementById('output').textContent = originalText;
+            transcript = original;
+            translated = false;
+            document.getElementById('output').textContent = original;
             origBtn.style.display = 'none';
             menu.classList.remove('show');
-            var wc = originalText.split(/\s+/).filter(Boolean).length;
+            const wc = original.split(/\s+/).filter(Boolean).length;
             document.getElementById('metaText').textContent = wc.toLocaleString() + ' words';
-            setStatus('Transcript ready', 'ok');
+            setStatus('Done', 'ok');
         };
         menu.appendChild(origBtn);
 
-        for (var i = 0; i < langs.length; i++) {
+        for (let i = 0; i < langOptions.length; i++) {
             (function(lang) {
-                var opt = document.createElement('button');
+                const opt = document.createElement('button');
                 opt.className   = 'translate-option';
                 opt.textContent = lang.name;
                 opt.onclick     = function() { translateTo(lang.code, lang.name); };
                 menu.appendChild(opt);
-            })(langs[i]);
+            })(langOptions[i]);
         }
     }
 
     function translateTo(code, name) {
         document.getElementById('translateMenu').classList.remove('show');
-        showSpinner('Translating to ' + name + '…');
+        setLoading('Translating to ' + name + '…');
 
         fetch('/api/translate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: originalText, targetLang: code }),
+            body: JSON.stringify({ text: original, targetLang: code }),
         })
             .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
             .then(function(result) {
                 if (!result.ok) throw new Error(result.data.error || 'Translation failed.');
 
-                currentText  = result.data.text;
-                isTranslated = true;
+                transcript = result.data.text;
+                translated = true;
 
                 document.getElementById('output').textContent = result.data.text;
 
-                var wc = result.data.text.split(/\s+/).filter(Boolean).length;
+                const wc = result.data.text.split(/\s+/).filter(Boolean).length;
                 document.getElementById('metaText').textContent = wc.toLocaleString() + ' words · ' + name;
 
-                var origBtn = document.getElementById('showOriginalBtn');
+                const origBtn = document.getElementById('showOriginalBtn');
                 if (origBtn) origBtn.style.display = '';
 
                 setStatus('Translated to ' + name, 'ok');
@@ -788,11 +782,11 @@
     // Copy
     // ────────────────────────────────────────────────────────
     function copyText(e) {
-        navigator.clipboard.writeText(currentText).then(function() {
-            var btn  = e ? e.target : document.querySelector('.btn-sm');
-            var orig = btn.textContent;
+        navigator.clipboard.writeText(transcript).then(function() {
+            const btn  = e ? e.target : document.querySelector('.btn-sm');
+            const prev = btn.textContent;
             btn.textContent = 'Copied!';
-            setTimeout(function() { btn.textContent = orig; }, 1600);
+            setTimeout(function() { btn.textContent = prev; }, 1600);
         });
     }
 
@@ -812,47 +806,47 @@
 
     function downloadAs(format) {
         document.getElementById('downloadMenu').classList.remove('show');
-        var filename = 'capty-' + currentVideoId;
+        const filename = 'capty-' + videoId;
 
         if (format === 'txt') {
-            var blob = new Blob([currentText], { type: 'text/plain' });
+            const blob = new Blob([transcript], { type: 'text/plain' });
             downloadBlob(blob, filename + '.txt');
         }
 
         if (format === 'pdf') {
-            var win = window.open('', '_blank');
+            const win = window.open('', '_blank');
             win.document.write(
                 '<html><head><title>' + filename + '</title>' +
                 '<style>body{font-family:"Segoe UI","Noto Sans",Arial,sans-serif;font-size:13px;line-height:1.8;padding:40px;color:#222;max-width:700px}' +
                 'h1{font-size:16px;color:#666;margin-bottom:20px;border-bottom:1px solid #ddd;padding-bottom:10px}</style>' +
-                '</head><body><h1>Capty Transcript — ' + currentVideoId + '</h1>' +
-                '<p>' + currentText.replace(/\n/g, '<br>') + '</p></body></html>'
+                '</head><body><h1>Capty Transcript — ' + videoId + '</h1>' +
+                '<p>' + transcript.replace(/\n/g, '<br>') + '</p></body></html>'
             );
             win.document.close();
             setTimeout(function() { win.print(); }, 400);
         }
 
         if (format === 'docx') {
-            var paragraphs = currentText.split(/\n+/);
-            var xmlParts = [];
-            for (var i = 0; i < paragraphs.length; i++) {
-                var safe = paragraphs[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const paragraphs = transcript.split(/\n+/);
+            const xmlParts = [];
+            for (let i = 0; i < paragraphs.length; i++) {
+                const safe = paragraphs[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 xmlParts.push('<w:p><w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">' + safe + '</w:t></w:r></w:p>');
             }
-            var docContent =
+            const docContent =
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
                 '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' +
-                '<w:p><w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>Capty Transcript — ' + currentVideoId + '</w:t></w:r></w:p>' +
+                '<w:p><w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>Capty Transcript — ' + videoId + '</w:t></w:r></w:p>' +
                 '<w:p><w:r><w:t></w:t></w:r></w:p>' +
                 xmlParts.join('') +
                 '</w:body></w:document>';
-            var blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
             downloadBlob(blob, filename + '.doc');
         }
     }
 
     function downloadBlob(blob, name) {
-        var a = document.createElement('a');
+        const a = document.createElement('a');
         a.href     = URL.createObjectURL(blob);
         a.download = name;
         a.click();
@@ -860,47 +854,44 @@
     }
 
     // ────────────────────────────────────────────────────────
-    // History (localStorage)
+    // History
     // ────────────────────────────────────────────────────────
-    var HISTORY_KEY = 'capty_history';
-    var MAX_HISTORY = 10;
+    const STORAGE_KEY    = 'capty_history';
+    const HISTORY_LIMIT  = 10;
 
     function getHistory() {
         try {
-            var raw = localStorage.getItem(HISTORY_KEY);
+            const raw = localStorage.getItem(STORAGE_KEY);
             return raw ? JSON.parse(raw) : [];
         } catch (e) {
             return [];
         }
     }
 
-    function saveToHistory(videoId, text, wordCount) {
-        var history = getHistory();
+    function saveToHistory(id, text, wc) {
+        let history = getHistory();
 
-        // don't duplicate — remove old entry for this video if it exists
-        history = history.filter(function(item) { return item.id !== videoId; });
+        history = history.filter(function(item) { return item.id !== id; });
 
-        // add to the front
         history.unshift({
-            id: videoId,
-            words: wordCount,
+            id: id,
+            words: wc,
             date: new Date().toISOString(),
             preview: text.slice(0, 120),
         });
 
-        // cap it
-        if (history.length > MAX_HISTORY) {
-            history = history.slice(0, MAX_HISTORY);
+        if (history.length > HISTORY_LIMIT) {
+            history = history.slice(0, HISTORY_LIMIT);
         }
 
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
         renderHistory();
     }
 
     function renderHistory() {
-        var history = getHistory();
-        var card    = document.getElementById('historyCard');
-        var list    = document.getElementById('historyList');
+        const history = getHistory();
+        const card    = document.getElementById('historyCard');
+        const list    = document.getElementById('historyList');
 
         if (history.length === 0) {
             card.style.display = 'none';
@@ -910,37 +901,37 @@
         card.style.display = 'block';
         list.innerHTML = '';
 
-        for (var i = 0; i < history.length; i++) {
+        for (let i = 0; i < history.length; i++) {
             (function(item) {
-                var row = document.createElement('div');
+                const row = document.createElement('div');
                 row.className = 'history-item';
                 row.onclick = function() {
                     document.getElementById('urlInput').value = item.id;
                     fetchTranscript();
                 };
 
-                var thumb = document.createElement('img');
+                const thumb = document.createElement('img');
                 thumb.className = 'history-thumb';
                 thumb.src = 'https://i.ytimg.com/vi/' + item.id + '/default.jpg';
                 thumb.alt = '';
                 thumb.loading = 'lazy';
 
-                var info = document.createElement('div');
+                const info = document.createElement('div');
                 info.className = 'history-info';
 
-                var vidId = document.createElement('div');
-                vidId.className   = 'history-vid-id';
-                vidId.textContent = item.id;
+                const title = document.createElement('div');
+                title.className   = 'history-vid-id';
+                title.textContent = item.id;
 
-                var date = document.createElement('div');
+                const date = document.createElement('div');
                 date.className   = 'history-date';
-                var d = new Date(item.date);
+                const d = new Date(item.date);
                 date.textContent = d.toLocaleDateString();
 
-                info.appendChild(vidId);
+                info.appendChild(title);
                 info.appendChild(date);
 
-                var words = document.createElement('span');
+                const words = document.createElement('span');
                 words.className   = 'history-words';
                 words.textContent = item.words.toLocaleString() + ' words';
 
@@ -953,7 +944,7 @@
     }
 
     function clearHistory() {
-        localStorage.removeItem(HISTORY_KEY);
+        localStorage.removeItem(STORAGE_KEY);
         renderHistory();
     }
 
@@ -964,7 +955,6 @@
         if (e.key === 'Enter') fetchTranscript();
     });
 
-    // show history on page load
     renderHistory();
 </script>
 
