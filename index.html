@@ -9,11 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Noto+Sans+AR:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
             --bg:         #1a1a1e;
@@ -27,7 +23,6 @@
             --text-2:     #a1a1aa;
             --text-3:     #52525b;
             --success:    #4ade80;
-            --warning:    #fbbf24;
             --radius:     10px;
         }
 
@@ -47,48 +42,22 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 52px;
-        }
+        header { text-align: center; margin-bottom: 52px; }
 
-        .logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
+        .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; }
 
         .logo-icon {
-            width: 36px;
-            height: 36px;
+            width: 36px; height: 36px;
             background: var(--accent);
             border-radius: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        .logo-icon svg {
-            width: 18px;
-            height: 18px;
-            fill: #fff;
-        }
+        .logo-icon svg { width: 18px; height: 18px; fill: #fff; }
 
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            color: var(--text);
-        }
+        .logo-text { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
 
-        .tagline {
-            font-size: 0.8rem;
-            font-weight: 400;
-            color: var(--text-3);
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
+        .tagline { font-size: 0.8rem; font-weight: 400; color: var(--text-3); letter-spacing: 0.06em; text-transform: uppercase; }
 
         .card {
             width: 100%;
@@ -97,13 +66,12 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 28px;
+            transition: max-width 0.3s ease;
         }
 
-        .input-wrap {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+        .card.wide { max-width: 1200px; }
+
+        .input-wrap { display: flex; gap: 10px; margin-bottom: 20px; }
 
         input[type="text"] {
             flex: 1;
@@ -118,7 +86,7 @@
             transition: border-color 0.18s;
         }
 
-        input[type="text"]:focus { border-color: var(--accent); }
+        input[type="text"]:focus       { border-color: var(--accent); }
         input[type="text"]::placeholder { color: var(--text-3); }
 
         .btn-primary {
@@ -136,16 +104,11 @@
             letter-spacing: -0.2px;
         }
 
-        .btn-primary:hover   { opacity: 0.88; }
-        .btn-primary:active  { transform: scale(0.97); }
+        .btn-primary:hover    { opacity: 0.88; }
+        .btn-primary:active   { transform: scale(0.97); }
         .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
-        .lang-row {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-bottom: 18px;
-        }
+        .lang-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
 
         .lang-btn {
             background: transparent;
@@ -161,7 +124,7 @@
             letter-spacing: 0.02em;
         }
 
-        .lang-btn:hover { border-color: var(--border-2); color: var(--text); }
+        .lang-btn:hover  { border-color: var(--border-2); color: var(--text); }
         .lang-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
         .whisper-banner {
@@ -173,13 +136,7 @@
             margin-bottom: 18px;
         }
 
-        .whisper-banner p {
-            font-size: 0.8rem;
-            color: var(--text-2);
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-
+        .whisper-banner p { font-size: 0.8rem; color: var(--text-2); margin-bottom: 10px; line-height: 1.5; }
         .whisper-banner p strong { color: var(--text); }
 
         .btn-whisper {
@@ -195,8 +152,8 @@
             transition: opacity 0.15s, transform 0.1s;
         }
 
-        .btn-whisper:hover   { opacity: 0.88; }
-        .btn-whisper:active  { transform: scale(0.97); }
+        .btn-whisper:hover    { opacity: 0.88; }
+        .btn-whisper:active   { transform: scale(0.97); }
         .btn-whisper:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
         #status {
@@ -213,18 +170,9 @@
         #status.err { color: var(--accent); }
         #status.ok  { color: var(--success); }
 
-        .toolbar {
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
+        .toolbar { display: none; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 
-        .meta {
-            font-size: 0.75rem;
-            color: var(--text-3);
-            font-weight: 400;
-        }
+        .meta { font-size: 0.75rem; color: var(--text-3); font-weight: 400; }
 
         .toolbar-actions { display: flex; gap: 6px; }
 
@@ -285,9 +233,31 @@
             transition: all 0.12s;
         }
 
-        .download-option:hover, .translate-option:hover { background: var(--border); color: var(--text); }
+        .download-option:hover  { background: var(--border); color: var(--text); }
+        .translate-option:hover { background: var(--border); color: var(--text); }
 
-        #output {
+        .translate-option.active-lang {
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        /* ── side-by-side columns ── */
+        .output-wrap { display: flex; gap: 12px; }
+
+        .output-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+        .col-header {
+            display: none;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-3);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            padding: 0 2px;
+        }
+
+        .col-body {
             display: none;
             background: var(--bg);
             border: 1px solid var(--border);
@@ -304,12 +274,7 @@
             scrollbar-color: var(--border) transparent;
         }
 
-        .ts-line {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 6px;
-            align-items: baseline;
-        }
+        .ts-line { display: flex; gap: 10px; margin-bottom: 6px; align-items: baseline; }
 
         .ts-label {
             color: var(--accent);
@@ -324,8 +289,7 @@
         .ts-label:hover { opacity: 1; }
 
         .spinner {
-            width: 13px;
-            height: 13px;
+            width: 13px; height: 13px;
             border: 2px solid var(--border-2);
             border-top-color: var(--accent);
             border-radius: 50%;
@@ -335,30 +299,15 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .history-card {
-            width: 100%;
-            max-width: 680px;
-            margin-top: 20px;
-        }
+        /* ── history ── */
+        .history-card { width: 100%; max-width: 680px; margin-top: 20px; }
 
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 
-        .history-title {
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--text-3);
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
+        .history-title { font-size: 0.75rem; font-weight: 500; color: var(--text-3); letter-spacing: 0.04em; text-transform: uppercase; }
 
         .history-clear {
-            background: none;
-            border: none;
+            background: none; border: none;
             color: var(--text-3);
             font-family: 'Geist', sans-serif;
             font-size: 0.7rem;
@@ -368,16 +317,10 @@
 
         .history-clear:hover { color: var(--accent); }
 
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+        .history-list { display: flex; flex-direction: column; gap: 6px; }
 
         .history-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: flex; align-items: center; gap: 12px;
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 10px;
@@ -389,54 +332,34 @@
         .history-item:hover { border-color: var(--border-2); }
 
         .history-thumb {
-            width: 48px;
-            height: 36px;
+            width: 48px; height: 36px;
             border-radius: 5px;
             background: var(--surface-2);
             flex-shrink: 0;
             object-fit: cover;
         }
 
-        .history-info {
-            flex: 1;
-            min-width: 0;
+        .history-info { flex: 1; min-width: 0; }
+
+        .history-vid-title {
+            font-size: 0.8rem; font-weight: 500; color: var(--text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        .history-vid-id {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: var(--text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .history-date { font-size: 0.7rem; color: var(--text-3); }
+        .history-words { font-size: 0.7rem; color: var(--text-3); white-space: nowrap; }
 
-        .history-date {
-            font-size: 0.7rem;
-            color: var(--text-3);
-        }
-
-        .history-words {
-            font-size: 0.7rem;
-            color: var(--text-3);
-            white-space: nowrap;
-        }
-
-        footer {
-            margin-top: 36px;
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-3);
-        }
+        footer { margin-top: 36px; text-align: center; font-size: 0.75rem; color: var(--text-3); }
 
         footer a {
-            color: var(--text-3);
-            text-decoration: none;
+            color: var(--text-3); text-decoration: none;
             border-bottom: 1px solid var(--border);
             transition: color 0.15s, border-color 0.15s;
         }
 
         footer a:hover { color: var(--text-2); border-color: var(--border-2); }
+
+        @media (max-width: 700px) { .output-wrap { flex-direction: column; } }
     </style>
 </head>
 <body>
@@ -455,7 +378,7 @@
     <p class="tagline">YouTube transcript, instantly</p>
 </header>
 
-<div class="card">
+<div class="card" id="card">
 
     <div class="input-wrap">
         <input type="text" id="urlInput" placeholder="Paste YouTube URL or video ID…" autocomplete="off" spellcheck="false">
@@ -484,14 +407,25 @@
                 <button class="btn-sm" onclick="toggleDownloadMenu(event)">Download ▾</button>
                 <div class="download-menu" id="downloadMenu">
                     <button class="download-option" onclick="downloadAs('txt')">.txt</button>
+                    <button class="download-option" id="dlTsTxt" style="display:none;" onclick="downloadAs('txt-ts')">.txt + timestamps</button>
                     <button class="download-option" onclick="downloadAs('pdf')">.pdf</button>
                     <button class="download-option" onclick="downloadAs('docx')">.docx</button>
+                    <button class="download-option" id="dlTsDocx" style="display:none;" onclick="downloadAs('docx-ts')">.docx + timestamps</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="output"></div>
+    <div class="output-wrap">
+        <div class="output-col" id="colOriginal">
+            <div class="col-header" id="colOriginalHeader"></div>
+            <div class="col-body" id="output"></div>
+        </div>
+        <div class="output-col" id="colTranslated">
+            <div class="col-header" id="colTranslatedHeader"></div>
+            <div class="col-body" id="outputTranslated"></div>
+        </div>
+    </div>
 
 </div>
 
@@ -513,12 +447,13 @@
     let transcript       = '';
     let original         = '';
     let videoId          = '';
+    let videoTitle       = '';
     let tracks           = [];
     let langs            = [];
-    let translated       = false;
     let segments         = [];
     let originalSegments = [];
     let showTimestamps   = true;
+    let activeLangCode   = null;
 
     function parseVideoId(input) {
         input = input.trim();
@@ -552,15 +487,23 @@
         segments         = [];
         originalSegments = [];
         showTimestamps   = true;
+        videoTitle       = '';
+        activeLangCode   = null;
+
+        document.getElementById('card').classList.remove('wide');
         document.getElementById('langRow').innerHTML = '';
         document.getElementById('output').style.display = 'none';
+        document.getElementById('outputTranslated').style.display = 'none';
+        document.getElementById('colOriginalHeader').style.display = 'none';
+        document.getElementById('colTranslatedHeader').style.display = 'none';
         document.getElementById('toolbar').style.display = 'none';
         document.getElementById('whisperBanner').style.display = 'none';
         document.getElementById('tsToggleBtn').style.display = 'none';
         document.getElementById('translateBtn').style.display = 'none';
+        document.getElementById('dlTsTxt').style.display = 'none';
+        document.getElementById('dlTsDocx').style.display = 'none';
         document.getElementById('translateMenu').classList.remove('show');
         document.getElementById('downloadMenu').classList.remove('show');
-        translated = false;
     }
 
     function renderOutput() {
@@ -576,9 +519,9 @@
 
                 const ts = document.createElement('a');
                 ts.className = 'ts-label';
-                ts.href = 'https://www.youtube.com/watch?v=' + videoId + '&t=' + segments[i].seconds;
-                ts.target = '_blank';
-                ts.rel = 'noopener noreferrer';
+                ts.href      = 'https://www.youtube.com/watch?v=' + videoId + '&t=' + segments[i].seconds;
+                ts.target    = '_blank';
+                ts.rel       = 'noopener noreferrer';
                 ts.textContent = '[' + formatTime(segments[i].seconds) + ']';
 
                 const txt = document.createElement('span');
@@ -603,10 +546,10 @@
     function renderTranscript(text, langOptions, segs) {
         transcript       = text;
         original         = text;
-        translated       = false;
         segments         = segs || [];
         originalSegments = segments;
         showTimestamps   = segments.length > 0;
+        activeLangCode   = null;
 
         const wc = text.split(/\s+/).filter(Boolean).length;
         document.getElementById('metaText').textContent = wc.toLocaleString() + ' words';
@@ -615,11 +558,20 @@
         out.style.display = 'block';
         renderOutput();
 
+        // reset right column when a new transcript loads
+        document.getElementById('outputTranslated').style.display = 'none';
+        document.getElementById('colOriginalHeader').style.display = 'none';
+        document.getElementById('colTranslatedHeader').style.display = 'none';
+        document.getElementById('card').classList.remove('wide');
+
         document.getElementById('toolbar').style.display = 'flex';
 
         const tsBtn = document.getElementById('tsToggleBtn');
-        tsBtn.style.display  = segments.length > 0 ? '' : 'none';
-        tsBtn.textContent    = 'Hide timestamps';
+        tsBtn.style.display = segments.length > 0 ? '' : 'none';
+        tsBtn.textContent   = 'Hide timestamps';
+
+        document.getElementById('dlTsTxt').style.display  = segments.length > 0 ? '' : 'none';
+        document.getElementById('dlTsDocx').style.display = segments.length > 0 ? '' : 'none';
 
         setStatus('Done', 'ok');
 
@@ -629,7 +581,7 @@
             document.getElementById('translateBtn').style.display = '';
         }
 
-        saveToHistory(videoId, text, wc);
+        saveToHistory(videoId, videoTitle, text, wc);
     }
 
     function fetchTranscript() {
@@ -651,7 +603,8 @@
             .then(function(result) {
                 if (!result.ok) throw new Error(result.data.error || 'Something went wrong.');
 
-                tracks = result.data.tracks;
+                tracks     = result.data.tracks;
+                videoTitle = result.data.title || videoId;
 
                 if (tracks.length === 0 && result.data.whisperAvailable) {
                     setStatus('');
@@ -688,9 +641,7 @@
 
         setLoading('Pulling captions…');
 
-        const track = tracks[index];
-
-        fetch('/api/caption?id=' + videoId + '&lang=' + track.languageCode)
+        fetch('/api/caption?id=' + videoId + '&lang=' + tracks[index].languageCode)
             .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
             .then(function(result) {
                 if (!result.ok) throw new Error(result.data.error || 'Failed to load transcript.');
@@ -734,36 +685,12 @@
         const menu = document.getElementById('translateMenu');
         menu.innerHTML = '';
 
-        const origBtn = document.createElement('button');
-        origBtn.className     = 'translate-option';
-        origBtn.textContent   = '↩ Show original';
-        origBtn.id            = 'showOriginalBtn';
-        origBtn.style.display = 'none';
-        origBtn.onclick = function() {
-            transcript     = original;
-            translated     = false;
-            segments       = originalSegments;
-            showTimestamps = segments.length > 0;
-
-            const tsBtn = document.getElementById('tsToggleBtn');
-            tsBtn.style.display = segments.length > 0 ? '' : 'none';
-            tsBtn.textContent   = 'Hide timestamps';
-
-            renderOutput();
-            origBtn.style.display = 'none';
-            menu.classList.remove('show');
-
-            const wc = original.split(/\s+/).filter(Boolean).length;
-            document.getElementById('metaText').textContent = wc.toLocaleString() + ' words';
-            setStatus('Done', 'ok');
-        };
-        menu.appendChild(origBtn);
-
         for (let i = 0; i < langOptions.length; i++) {
             (function(lang) {
                 const opt = document.createElement('button');
                 opt.className   = 'translate-option';
                 opt.textContent = lang.name;
+                opt.id          = 'tlang-' + lang.code;
                 opt.onclick     = function() { translateTo(lang.code, lang.name); };
                 menu.appendChild(opt);
             })(langOptions[i]);
@@ -772,7 +699,22 @@
 
     function translateTo(code, name) {
         document.getElementById('translateMenu').classList.remove('show');
-        setLoading('Translating to ' + name + '…');
+
+        const rightCol = document.getElementById('outputTranslated');
+
+        // if right column is already visible, show spinner inside it
+        if (rightCol.style.display === 'block') {
+            rightCol.style.whiteSpace = 'normal';
+            rightCol.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:4px 0"><div class="spinner"></div><span style="font-size:0.8rem;color:var(--text-3)">Translating…</span></div>';
+        } else {
+            setLoading('Translating to ' + name + '…');
+        }
+
+        // mark active language in the menu
+        const allOpts = document.querySelectorAll('.translate-option');
+        for (let i = 0; i < allOpts.length; i++) allOpts[i].classList.remove('active-lang');
+        const activeOpt = document.getElementById('tlang-' + code);
+        if (activeOpt) activeOpt.classList.add('active-lang');
 
         fetch('/api/translate', {
             method: 'POST',
@@ -783,21 +725,28 @@
             .then(function(result) {
                 if (!result.ok) throw new Error(result.data.error || 'Translation failed.');
 
-                transcript     = result.data.text;
-                translated     = true;
-                segments       = [];
-                showTimestamps = false;
+                activeLangCode = code;
 
-                document.getElementById('tsToggleBtn').style.display = 'none';
-                renderOutput();
+                // expand card and show column headers
+                document.getElementById('card').classList.add('wide');
 
-                const wc = result.data.text.split(/\s+/).filter(Boolean).length;
-                document.getElementById('metaText').textContent = wc.toLocaleString() + ' words · ' + name;
+                const origHeader = document.getElementById('colOriginalHeader');
+                origHeader.style.display = 'block';
+                origHeader.textContent   = 'Original';
 
-                const origBtn = document.getElementById('showOriginalBtn');
-                if (origBtn) origBtn.style.display = '';
+                const transHeader = document.getElementById('colTranslatedHeader');
+                transHeader.style.display = 'block';
+                transHeader.textContent   = name;
 
-                setStatus('Translated to ' + name, 'ok');
+                // render translation into right column
+                rightCol.style.display    = 'block';
+                rightCol.style.whiteSpace = 'pre-wrap';
+                rightCol.textContent      = result.data.text;
+
+                const origWc  = original.split(/\s+/).filter(Boolean).length;
+                document.getElementById('metaText').textContent = origWc.toLocaleString() + ' words · ' + name;
+
+                setStatus('Done', 'ok');
             })
             .catch(function(err) {
                 setStatus(err.message, 'err');
@@ -835,17 +784,22 @@
         const filename = 'capty-' + videoId;
 
         if (format === 'txt') {
-            const blob = new Blob([transcript], { type: 'text/plain' });
-            downloadBlob(blob, filename + '.txt');
+            downloadBlob(new Blob([transcript], { type: 'text/plain' }), filename + '.txt');
+        }
+
+        if (format === 'txt-ts') {
+            const lines = segments.map(function(s) { return '[' + formatTime(s.seconds) + '] ' + s.text; });
+            downloadBlob(new Blob([lines.join('\n')], { type: 'text/plain' }), filename + '-timestamped.txt');
         }
 
         if (format === 'pdf') {
             const win = window.open('', '_blank');
+            const titleSafe = (videoTitle || videoId).replace(/</g, '&lt;').replace(/>/g, '&gt;');
             win.document.write(
                 '<html><head><title>' + filename + '</title>' +
                 '<style>body{font-family:"Segoe UI","Noto Sans",Arial,sans-serif;font-size:13px;line-height:1.8;padding:40px;color:#222;max-width:700px}' +
                 'h1{font-size:16px;color:#666;margin-bottom:20px;border-bottom:1px solid #ddd;padding-bottom:10px}</style>' +
-                '</head><body><h1>Capty Transcript — ' + videoId + '</h1>' +
+                '</head><body><h1>' + titleSafe + '</h1>' +
                 '<p>' + transcript.replace(/\n/g, '<br>') + '</p></body></html>'
             );
             win.document.close();
@@ -853,21 +807,37 @@
         }
 
         if (format === 'docx') {
-            const paragraphs = transcript.split(/\n+/);
-            const xmlParts = [];
-            for (let i = 0; i < paragraphs.length; i++) {
-                const safe = paragraphs[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                xmlParts.push('<w:p><w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">' + safe + '</w:t></w:r></w:p>');
-            }
+            const titleSafe = (videoTitle || videoId).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const xmlParts  = transcript.split(/\n+/).map(function(p) {
+                const safe = p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return '<w:p><w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">' + safe + '</w:t></w:r></w:p>';
+            });
             const docContent =
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
                 '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' +
-                '<w:p><w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>Capty Transcript — ' + videoId + '</w:t></w:r></w:p>' +
+                '<w:p><w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>' + titleSafe + '</w:t></w:r></w:p>' +
                 '<w:p><w:r><w:t></w:t></w:r></w:p>' +
-                xmlParts.join('') +
-                '</w:body></w:document>';
-            const blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-            downloadBlob(blob, filename + '.doc');
+                xmlParts.join('') + '</w:body></w:document>';
+            downloadBlob(new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }), filename + '.doc');
+        }
+
+        if (format === 'docx-ts') {
+            const titleSafe = (videoTitle || videoId).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const xmlParts  = segments.map(function(s) {
+                const ts   = '[' + formatTime(s.seconds) + ']';
+                const safe = s.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return '<w:p>' +
+                    '<w:r><w:rPr><w:color w:val="FF6B6B"/><w:sz w:val="18"/><w:rFonts w:ascii="Courier New" w:hAnsi="Courier New"/></w:rPr><w:t xml:space="preserve">' + ts + '  </w:t></w:r>' +
+                    '<w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">' + safe + '</w:t></w:r>' +
+                    '</w:p>';
+            });
+            const docContent =
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+                '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' +
+                '<w:p><w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>' + titleSafe + '</w:t></w:r></w:p>' +
+                '<w:p><w:r><w:t></w:t></w:r></w:p>' +
+                xmlParts.join('') + '</w:body></w:document>';
+            downloadBlob(new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }), filename + '-timestamped.doc');
         }
     }
 
@@ -891,10 +861,10 @@
         }
     }
 
-    function saveToHistory(id, text, wc) {
+    function saveToHistory(id, title, text, wc) {
         let history = getHistory();
         history = history.filter(function(item) { return item.id !== id; });
-        history.unshift({ id: id, words: wc, date: new Date().toISOString(), preview: text.slice(0, 120) });
+        history.unshift({ id: id, title: title || id, words: wc, date: new Date().toISOString() });
         if (history.length > HISTORY_LIMIT) history = history.slice(0, HISTORY_LIMIT);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
         renderHistory();
@@ -905,10 +875,7 @@
         const card    = document.getElementById('historyCard');
         const list    = document.getElementById('historyList');
 
-        if (history.length === 0) {
-            card.style.display = 'none';
-            return;
-        }
+        if (history.length === 0) { card.style.display = 'none'; return; }
 
         card.style.display = 'block';
         list.innerHTML = '';
@@ -932,8 +899,8 @@
                 info.className = 'history-info';
 
                 const title = document.createElement('div');
-                title.className   = 'history-vid-id';
-                title.textContent = item.id;
+                title.className   = 'history-vid-title';
+                title.textContent = item.title || item.id;
 
                 const date = document.createElement('div');
                 date.className   = 'history-date';

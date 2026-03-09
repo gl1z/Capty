@@ -39,13 +39,14 @@ docker run -p 3000:3000 -e OPENAI_API_KEY=sk-your-key-here capty
 
 ## Features
 
-- **Timestamped output** — each line shows `[M:SS]` linking to that point in the video
-- **Caption extraction** — pulls existing subtitles via yt-dlp, no API cost
-- **Whisper fallback** — generates transcript from audio when no captions exist (uses OpenAI API)
-- **Translation** — GPT-4o-mini translation into 15 languages (uses OpenAI API)
-- **Export** — download as `.txt`, `.pdf`, or `.docx`
-- **History** — recent videos stored locally in the browser
-
+- **Timestamped output** - each line shows `[M:SS]` linking to that point in the video
+- **Caption extraction** - pulls existing subtitles via yt-dlp, no API cost
+- **Whisper fallback** - generates transcript from audio when no captions exist (uses OpenAI API)
+- **Translation** - GPT 4o mini translation into 15 languages (uses OpenAI API)
+- **Export** - download as `.txt`, `.pdf`, or `.docx`, with optional timestamps included
+- **History** - recent videos stored locally in the browser
+- **Side-by-side translation** - original and translated transcript shown in parallel columns
+- **Video titles in history** - recent panel shows the video title instead of the ID
 ## Env vars
 
 | Variable | Required | Description |
