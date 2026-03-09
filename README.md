@@ -1,14 +1,16 @@
 # Capty
 
-**[Live Demo →](https://capty.onrender.com)** *(https://capty-izpe.onrender.com)*
+**[Live Demo →](https://capty-izpe.onrender.com)**
 
-Paste a YouTube link, get the transcript. That's it.
+Paste a YouTube URL, get the full transcript. Timestamped segments link back to the exact moment in the video.
 
-Works with any video that has captions. If there are no captions, it can transcribe the audio using OpenAI Whisper. You can also translate the result into other languages.
+Works with any video that has captions. Falls back to OpenAI Whisper for videos without subtitles. Translates into 15 languages.
+
+> **Requires an OpenAI API key** for Whisper transcription and translation. Caption extraction from videos that already have subtitles is free and uses no API credits.
 
 ## Setup
 
-You need Node.js 20+, Python 3 with yt-dlp installed, and an OpenAI API key.
+Node.js 20+ and Python 3 with `yt-dlp` installed.
 
 ```bash
 git clone https://github.com/gl1z/capty.git
@@ -22,13 +24,11 @@ Create a `.env` file in the root:
 OPENAI_API_KEY=sk-your-key-here
 ```
 
-Then run it:
-
 ```bash
 npm start
 ```
 
-Goes to `http://localhost:3000`.
+Opens at `http://localhost:3000`.
 
 ### Docker
 
@@ -37,19 +37,27 @@ docker build -t capty .
 docker run -p 3000:3000 -e OPENAI_API_KEY=sk-your-key-here capty
 ```
 
-## What it does
+## Features
 
-Pulls existing captions from YouTube via yt-dlp. Falls back to Whisper if the video has no subtitles. Translates transcripts using GPT-4o-mini. Lets you copy or download as .txt, .pdf, or .docx.
+- **Timestamped output** — each line shows `[M:SS]` linking to that point in the video
+- **Caption extraction** — pulls existing subtitles via yt-dlp, no API cost
+- **Whisper fallback** — generates transcript from audio when no captions exist (uses OpenAI API)
+- **Translation** — GPT-4o-mini translation into 15 languages (uses OpenAI API)
+- **Export** — download as `.txt`, `.pdf`, or `.docx`
+- **History** — recent videos stored locally in the browser
 
 ## Env vars
 
-`OPENAI_API_KEY` — required, get one from platform.openai.com
-
-`PORT` — optional, defaults to 3000
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OPENAI_API_KEY` | Yes | From [platform.openai.com](https://platform.openai.com) |
+| `PORT` | No | Defaults to 3000 |
 
 ## License
 
-MIT---
+MIT
+
+---
 
 Built by [@gl1z](https://github.com/gl1z)
 

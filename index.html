@@ -118,13 +118,8 @@
             transition: border-color 0.18s;
         }
 
-        input[type="text"]:focus {
-            border-color: var(--accent);
-        }
-
-        input[type="text"]::placeholder {
-            color: var(--text-3);
-        }
+        input[type="text"]:focus { border-color: var(--accent); }
+        input[type="text"]::placeholder { color: var(--text-3); }
 
         .btn-primary {
             background: var(--accent);
@@ -141,8 +136,8 @@
             letter-spacing: -0.2px;
         }
 
-        .btn-primary:hover  { opacity: 0.88; }
-        .btn-primary:active { transform: scale(0.97); }
+        .btn-primary:hover   { opacity: 0.88; }
+        .btn-primary:active  { transform: scale(0.97); }
         .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
         .lang-row {
@@ -166,16 +161,8 @@
             letter-spacing: 0.02em;
         }
 
-        .lang-btn:hover {
-            border-color: var(--border-2);
-            color: var(--text);
-        }
-
-        .lang-btn.active {
-            background: var(--accent-dim);
-            border-color: var(--accent);
-            color: var(--accent);
-        }
+        .lang-btn:hover { border-color: var(--border-2); color: var(--text); }
+        .lang-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
         .whisper-banner {
             display: none;
@@ -193,9 +180,7 @@
             line-height: 1.5;
         }
 
-        .whisper-banner p strong {
-            color: var(--text);
-        }
+        .whisper-banner p strong { color: var(--text); }
 
         .btn-whisper {
             background: var(--accent);
@@ -210,8 +195,8 @@
             transition: opacity 0.15s, transform 0.1s;
         }
 
-        .btn-whisper:hover  { opacity: 0.88; }
-        .btn-whisper:active { transform: scale(0.97); }
+        .btn-whisper:hover   { opacity: 0.88; }
+        .btn-whisper:active  { transform: scale(0.97); }
         .btn-whisper:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
         #status {
@@ -225,8 +210,8 @@
             font-weight: 400;
         }
 
-        #status.err  { color: var(--accent); }
-        #status.ok   { color: var(--success); }
+        #status.err { color: var(--accent); }
+        #status.ok  { color: var(--success); }
 
         .toolbar {
             display: none;
@@ -256,14 +241,9 @@
             transition: all 0.15s;
         }
 
-        .btn-sm:hover {
-            border-color: var(--border-2);
-            color: var(--text);
-        }
+        .btn-sm:hover { border-color: var(--border-2); color: var(--text); }
 
-        .download-wrap, .translate-wrap {
-            position: relative;
-        }
+        .download-wrap, .translate-wrap { position: relative; }
 
         .download-menu, .translate-menu {
             display: none;
@@ -287,9 +267,7 @@
             scrollbar-color: var(--border) transparent;
         }
 
-        .download-menu.show, .translate-menu.show {
-            display: block;
-        }
+        .download-menu.show, .translate-menu.show { display: block; }
 
         .download-option, .translate-option {
             display: block;
@@ -307,10 +285,7 @@
             transition: all 0.12s;
         }
 
-        .download-option:hover, .translate-option:hover {
-            background: var(--border);
-            color: var(--text);
-        }
+        .download-option:hover, .translate-option:hover { background: var(--border); color: var(--text); }
 
         #output {
             display: none;
@@ -324,11 +299,29 @@
             font-size: 0.88rem;
             line-height: 1.85;
             color: var(--text-2);
-            white-space: pre-wrap;
             word-break: break-word;
             scrollbar-width: thin;
             scrollbar-color: var(--border) transparent;
         }
+
+        .ts-line {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 6px;
+            align-items: baseline;
+        }
+
+        .ts-label {
+            color: var(--accent);
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.75rem;
+            text-decoration: none;
+            flex-shrink: 0;
+            opacity: 0.6;
+            transition: opacity 0.15s;
+        }
+
+        .ts-label:hover { opacity: 1; }
 
         .spinner {
             width: 13px;
@@ -342,7 +335,6 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── History section ─────────────────────── */
         .history-card {
             width: 100%;
             max-width: 680px;
@@ -374,9 +366,7 @@
             transition: color 0.15s;
         }
 
-        .history-clear:hover {
-            color: var(--accent);
-        }
+        .history-clear:hover { color: var(--accent); }
 
         .history-list {
             display: flex;
@@ -396,9 +386,7 @@
             transition: border-color 0.15s;
         }
 
-        .history-item:hover {
-            border-color: var(--border-2);
-        }
+        .history-item:hover { border-color: var(--border-2); }
 
         .history-thumb {
             width: 48px;
@@ -448,10 +436,7 @@
             transition: color 0.15s, border-color 0.15s;
         }
 
-        footer a:hover {
-            color: var(--text-2);
-            border-color: var(--border-2);
-        }
+        footer a:hover { color: var(--text-2); border-color: var(--border-2); }
     </style>
 </head>
 <body>
@@ -490,6 +475,7 @@
         <span class="meta" id="metaText"></span>
         <div class="toolbar-actions">
             <button class="btn-sm" onclick="copyText(event)">Copy</button>
+            <button class="btn-sm" id="tsToggleBtn" onclick="toggleTimestamps()" style="display:none;">Hide timestamps</button>
             <div class="translate-wrap">
                 <button class="btn-sm" id="translateBtn" onclick="toggleTranslateMenu(event)" style="display:none;">Translate ▾</button>
                 <div class="translate-menu" id="translateMenu"></div>
@@ -509,7 +495,6 @@
 
 </div>
 
-<!-- History section -->
 <div class="history-card" id="historyCard" style="display:none;">
     <div class="history-header">
         <span class="history-title">Recent</span>
@@ -525,19 +510,16 @@
 </footer>
 
 <script>
-    // ────────────────────────────────────────────────────────
-    // State
-    // ────────────────────────────────────────────────────────
-    let transcript = '';
-    let original   = '';
-    let videoId    = '';
-    let tracks     = [];
-    let langs      = [];
-    let translated = false;
+    let transcript       = '';
+    let original         = '';
+    let videoId          = '';
+    let tracks           = [];
+    let langs            = [];
+    let translated       = false;
+    let segments         = [];
+    let originalSegments = [];
+    let showTimestamps   = true;
 
-    // ────────────────────────────────────────────────────────
-    // Helpers
-    // ────────────────────────────────────────────────────────
     function parseVideoId(input) {
         input = input.trim();
         const patterns = [
@@ -561,33 +543,84 @@
         setStatus('<div class="spinner"></div><span>' + msg + '</span>');
     }
 
+    function formatTime(s) {
+        const m = Math.floor(s / 60);
+        return m + ':' + String(s % 60).padStart(2, '0');
+    }
+
     function resetUI() {
+        segments         = [];
+        originalSegments = [];
+        showTimestamps   = true;
         document.getElementById('langRow').innerHTML = '';
         document.getElementById('output').style.display = 'none';
         document.getElementById('toolbar').style.display = 'none';
         document.getElementById('whisperBanner').style.display = 'none';
+        document.getElementById('tsToggleBtn').style.display = 'none';
         document.getElementById('translateBtn').style.display = 'none';
         document.getElementById('translateMenu').classList.remove('show');
         document.getElementById('downloadMenu').classList.remove('show');
         translated = false;
     }
 
-    // ────────────────────────────────────────────────────────
-    // Display result
-    // ────────────────────────────────────────────────────────
-    function renderTranscript(text, langOptions) {
-        transcript = text;
-        original   = text;
-        translated = false;
+    function renderOutput() {
+        const out = document.getElementById('output');
+
+        if (showTimestamps && segments.length > 0) {
+            out.style.whiteSpace = 'normal';
+            out.innerHTML = '';
+
+            for (let i = 0; i < segments.length; i++) {
+                const line = document.createElement('div');
+                line.className = 'ts-line';
+
+                const ts = document.createElement('a');
+                ts.className = 'ts-label';
+                ts.href = 'https://www.youtube.com/watch?v=' + videoId + '&t=' + segments[i].seconds;
+                ts.target = '_blank';
+                ts.rel = 'noopener noreferrer';
+                ts.textContent = '[' + formatTime(segments[i].seconds) + ']';
+
+                const txt = document.createElement('span');
+                txt.textContent = segments[i].text;
+
+                line.appendChild(ts);
+                line.appendChild(txt);
+                out.appendChild(line);
+            }
+        } else {
+            out.style.whiteSpace = 'pre-wrap';
+            out.textContent = transcript;
+        }
+    }
+
+    function toggleTimestamps() {
+        showTimestamps = !showTimestamps;
+        document.getElementById('tsToggleBtn').textContent = showTimestamps ? 'Hide timestamps' : 'Show timestamps';
+        renderOutput();
+    }
+
+    function renderTranscript(text, langOptions, segs) {
+        transcript       = text;
+        original         = text;
+        translated       = false;
+        segments         = segs || [];
+        originalSegments = segments;
+        showTimestamps   = segments.length > 0;
 
         const wc = text.split(/\s+/).filter(Boolean).length;
         document.getElementById('metaText').textContent = wc.toLocaleString() + ' words';
 
         const out = document.getElementById('output');
-        out.textContent   = text;
         out.style.display = 'block';
+        renderOutput();
 
         document.getElementById('toolbar').style.display = 'flex';
+
+        const tsBtn = document.getElementById('tsToggleBtn');
+        tsBtn.style.display  = segments.length > 0 ? '' : 'none';
+        tsBtn.textContent    = 'Hide timestamps';
+
         setStatus('Done', 'ok');
 
         if (langOptions && langOptions.length > 0) {
@@ -599,9 +632,6 @@
         saveToHistory(videoId, text, wc);
     }
 
-    // ────────────────────────────────────────────────────────
-    // Fetch available caption tracks
-    // ────────────────────────────────────────────────────────
     function fetchTranscript() {
         const input = document.getElementById('urlInput').value;
         const id    = parseVideoId(input);
@@ -649,9 +679,6 @@
             });
     }
 
-    // ────────────────────────────────────────────────────────
-    // Load a specific caption track
-    // ────────────────────────────────────────────────────────
     function loadCaption(index, btn) {
         if (btn) {
             const all = document.querySelectorAll('.lang-btn');
@@ -667,7 +694,7 @@
             .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
             .then(function(result) {
                 if (!result.ok) throw new Error(result.data.error || 'Failed to load transcript.');
-                renderTranscript(result.data.text, result.data.translateLangs);
+                renderTranscript(result.data.text, result.data.translateLangs, result.data.segments);
             })
             .catch(function(err) {
                 setStatus(err.message + ' — you can try AI transcription instead.', 'err');
@@ -678,9 +705,6 @@
             });
     }
 
-    // ────────────────────────────────────────────────────────
-    // Whisper fallback
-    // ────────────────────────────────────────────────────────
     function runWhisper() {
         document.getElementById('whisperBtn').disabled = true;
         document.getElementById('whisperBanner').style.display = 'none';
@@ -706,9 +730,6 @@
             });
     }
 
-    // ────────────────────────────────────────────────────────
-    // Translate
-    // ────────────────────────────────────────────────────────
     function buildTranslateMenu(langOptions) {
         const menu = document.getElementById('translateMenu');
         menu.innerHTML = '';
@@ -719,11 +740,19 @@
         origBtn.id            = 'showOriginalBtn';
         origBtn.style.display = 'none';
         origBtn.onclick = function() {
-            transcript = original;
-            translated = false;
-            document.getElementById('output').textContent = original;
+            transcript     = original;
+            translated     = false;
+            segments       = originalSegments;
+            showTimestamps = segments.length > 0;
+
+            const tsBtn = document.getElementById('tsToggleBtn');
+            tsBtn.style.display = segments.length > 0 ? '' : 'none';
+            tsBtn.textContent   = 'Hide timestamps';
+
+            renderOutput();
             origBtn.style.display = 'none';
             menu.classList.remove('show');
+
             const wc = original.split(/\s+/).filter(Boolean).length;
             document.getElementById('metaText').textContent = wc.toLocaleString() + ' words';
             setStatus('Done', 'ok');
@@ -754,10 +783,13 @@
             .then(function(result) {
                 if (!result.ok) throw new Error(result.data.error || 'Translation failed.');
 
-                transcript = result.data.text;
-                translated = true;
+                transcript     = result.data.text;
+                translated     = true;
+                segments       = [];
+                showTimestamps = false;
 
-                document.getElementById('output').textContent = result.data.text;
+                document.getElementById('tsToggleBtn').style.display = 'none';
+                renderOutput();
 
                 const wc = result.data.text.split(/\s+/).filter(Boolean).length;
                 document.getElementById('metaText').textContent = wc.toLocaleString() + ' words · ' + name;
@@ -778,9 +810,6 @@
         document.getElementById('translateMenu').classList.toggle('show');
     }
 
-    // ────────────────────────────────────────────────────────
-    // Copy
-    // ────────────────────────────────────────────────────────
     function copyText(e) {
         navigator.clipboard.writeText(transcript).then(function() {
             const btn  = e ? e.target : document.querySelector('.btn-sm');
@@ -790,9 +819,6 @@
         });
     }
 
-    // ────────────────────────────────────────────────────────
-    // Download
-    // ────────────────────────────────────────────────────────
     function toggleDownloadMenu(e) {
         e.stopPropagation();
         document.getElementById('translateMenu').classList.remove('show');
@@ -853,11 +879,8 @@
         URL.revokeObjectURL(a.href);
     }
 
-    // ────────────────────────────────────────────────────────
-    // History
-    // ────────────────────────────────────────────────────────
-    const STORAGE_KEY    = 'capty_history';
-    const HISTORY_LIMIT  = 10;
+    const STORAGE_KEY   = 'capty_history';
+    const HISTORY_LIMIT = 10;
 
     function getHistory() {
         try {
@@ -870,20 +893,9 @@
 
     function saveToHistory(id, text, wc) {
         let history = getHistory();
-
         history = history.filter(function(item) { return item.id !== id; });
-
-        history.unshift({
-            id: id,
-            words: wc,
-            date: new Date().toISOString(),
-            preview: text.slice(0, 120),
-        });
-
-        if (history.length > HISTORY_LIMIT) {
-            history = history.slice(0, HISTORY_LIMIT);
-        }
-
+        history.unshift({ id: id, words: wc, date: new Date().toISOString(), preview: text.slice(0, 120) });
+        if (history.length > HISTORY_LIMIT) history = history.slice(0, HISTORY_LIMIT);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
         renderHistory();
     }
@@ -912,11 +924,11 @@
 
                 const thumb = document.createElement('img');
                 thumb.className = 'history-thumb';
-                thumb.src = 'https://i.ytimg.com/vi/' + item.id + '/default.jpg';
-                thumb.alt = '';
-                thumb.loading = 'lazy';
+                thumb.src       = 'https://i.ytimg.com/vi/' + item.id + '/default.jpg';
+                thumb.alt       = '';
+                thumb.loading   = 'lazy';
 
-                const info = document.createElement('div');
+                const info  = document.createElement('div');
                 info.className = 'history-info';
 
                 const title = document.createElement('div');
@@ -925,8 +937,7 @@
 
                 const date = document.createElement('div');
                 date.className   = 'history-date';
-                const d = new Date(item.date);
-                date.textContent = d.toLocaleDateString();
+                date.textContent = new Date(item.date).toLocaleDateString();
 
                 info.appendChild(title);
                 info.appendChild(date);
@@ -948,9 +959,6 @@
         renderHistory();
     }
 
-    // ────────────────────────────────────────────────────────
-    // Init
-    // ────────────────────────────────────────────────────────
     document.getElementById('urlInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') fetchTranscript();
     });
@@ -960,3 +968,4 @@
 
 </body>
 </html>
+
