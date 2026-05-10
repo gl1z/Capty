@@ -3,7 +3,7 @@
 **[Live Demo →](https://capty-izpe.onrender.com)**
 
 Paste a YouTube URL, get the full transcript. Timestamped segments link back to the exact moment in the video.
-
+1
 Works with any video that has captions. Falls back to OpenAI Whisper for videos without subtitles. Translates into 15 languages.
 
 > **Requires an OpenAI API key** for Whisper transcription and translation. Caption extraction from videos that already have subtitles is free and uses no API credits.
